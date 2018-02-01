@@ -202,6 +202,9 @@ class HasuraBot(discord.Client):
         if message.author.id == self.user.id:
             return
 
+        if message.content == "(╯°□°）╯︵ ┻━┻":
+            await message.channel.send("┬─┬ ノ( ゜-゜ノ)")    
+
         #----------------------------------------------------------------------------#
         # Don't worry about this part. We are just defining **kwargs for later use.
         cmd, *args = message.content.split(' ') # The first word is cmd, everything else is args. 
