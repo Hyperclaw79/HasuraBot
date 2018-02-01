@@ -247,7 +247,7 @@ class HasuraBot(discord.Client):
             command = message.content.split("{}help ".format(self.prefix))[1].strip()
             cmdc = getattr(self, 'cmd_' + command, None)
             if cmdc:
-                await message.author.send('```cs\n{}```'.format(dedent(cmdc.__doc__).replace('{command_prefix}', '#' + self.prefix)))
+                await message.author.send('```py\n{}```'.format(dedent(cmdc.__doc__).replace('{command_prefix}', '@   ' + self.prefix).replace('Usage','Usage (don\'t include @)')))
             else:
                 await message.author.send('No such command')
         except:
