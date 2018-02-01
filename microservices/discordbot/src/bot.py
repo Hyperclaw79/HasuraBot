@@ -26,9 +26,21 @@ class HasuraBot(discord.Client):
 
 
     async def cmd_ping(self, message):
+        """
+        Usage:
+            {command_prefix}ping
+                        
+        Is it alive??
+        """
         await message.channel.send("Pong!")
 
     async def cmd_say(self, message):
+        """
+        Usage:
+            {command_prefix}say [your message]
+                        
+        Echoes your message after deleting it.
+        """
         msg = message.content.replace("{}say".format(self.prefix),'').strip() 
         await message.channel.send(msg)
         try:
@@ -37,6 +49,12 @@ class HasuraBot(discord.Client):
             print('Jeez! I need better permissions in {}.'.format(message.guild))
 
     async def cmd_shrug(self, message):
+        """
+        Usage:
+            {command_prefix}shrug
+                        
+        ASCII Shrugimation.
+        """
         await message.delete()
         shrugList = ["`¯\__(ツ)/¯`", "`¯\_(ツ)_/¯`", "`¯\(ツ)__/¯`", "`¯\_(ツ)_/¯`"]
         lulz = await message.channel.send(shrugList[1])
@@ -77,7 +95,7 @@ class HasuraBot(discord.Client):
        Usage: 
        {command_prefix}ppap
 
-       PPAP cancer bot version.
+       PPAP cancer, bot version.
        """
        mes = await message.channel.send("`¯\_(ツ)_/¯`")
        await mes.edit(content=":pen_ballpoint:         \n¯\_(ツ)_/¯")
@@ -117,6 +135,12 @@ class HasuraBot(discord.Client):
           await m1.edit(content=s)
 
     async def cmd_iam(self, message):
+        """
+        Usage:
+            {command_prefix}iam role
+                        
+        Assign yourself the entry level role.
+        """
         def check1(reaction, clicker):
             return clicker == user and reaction.message.id == base.id and reaction.emoji in list(roles_dict.keys())
         intent = message.content.split('{}iam '.format(self.prefix))[1].split(' ')[0].strip()
@@ -166,6 +190,12 @@ class HasuraBot(discord.Client):
             await user.send('You must either choose `intern` or `CA`.')    
 
     async def cmd_iamnot(self, message):
+        """
+        Usage:
+            {command_prefix}iamnot [your message]
+                        
+        Remove a role from yourself.
+        """
         param = message.content.split('{}iamnot '.format(self.prefix))[1].split(' ')[0].strip()
         role = [role for role in guild.roles if role.name.lower() == param.lower()][0]  
         user = message.author       
@@ -176,6 +206,12 @@ class HasuraBot(discord.Client):
         await log.send('User {} has removed the `@{}` role for themselves.'.format(user.name+'#'+user.discriminator, role))
 
     async def cmd_prune(self, message):
+        """
+        Usage:
+            {command_prefix}prune
+                        
+        Deletes last X messages. Mods only.
+        """
         role = str(message.author.top_role)
         mods = ["admin","team hasura","moderator"]
         if role in mods:
