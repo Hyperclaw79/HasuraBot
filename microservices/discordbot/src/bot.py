@@ -248,7 +248,7 @@ class HasuraBot(discord.Client):
             cmdc = getattr(self, 'cmd_' + command, None)
             if cmdc:
                 content = dedent(cmdc.__doc__).replace('{command_prefix}', '@   ' + self.prefix)
-                content = content.replace('Usage','Usage (do not include the @)').replace('\n\n','\n')
+                content = content.replace('Usage','Usage (exclude the @)').replace('\n\n','\n')
                 await message.author.send('```py\n{}```'.format(content))
             else:
                 await message.author.send('No such command')
