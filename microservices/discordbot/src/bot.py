@@ -41,7 +41,7 @@ class HasuraBot(discord.Client):
         shrugList = ["`¯\__(ツ)/¯`", "`¯\_(ツ)_/¯`", "`¯\(ツ)__/¯`", "`¯\_(ツ)_/¯`"]
         lulz = await message.channel.send(shrugList[1])
         i = 2
-        while True:
+        while i < 400:
             await lulz.edit(content=shrugList[i%4])
             i = i + 1    
 
