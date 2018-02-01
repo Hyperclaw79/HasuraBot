@@ -246,7 +246,7 @@ class HasuraBot(discord.Client):
         try:
             command = message.content.split("{}help ".format(self.prefix))[1].strip()
             cmdc = getattr(self, 'cmd_' + command, None)
-            print(command, cmdc)
+            print(dedent(cmdc.__doc__))
             if cmdc:
                 message.author.send('```cs\n{}```'.format(dedent(cmdc.__doc__).replace('{command_prefix}', '#' + self.prefix)))
             else:
