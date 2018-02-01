@@ -245,15 +245,12 @@ class HasuraBot(discord.Client):
         """
         try:
             command = message.content.split("{}help ".format(self.prefix))[1]
-        except:
-            command = None    
-        if command:
             cmdc = getattr(self, 'cmd_' + command, None)
             if cmdc:
                 message.author.send('```cs\n{}```'.format(dedent(cmdc.__doc__).replace('{command_prefix}', '#' + self.prefix)))
             else:
                 message.author.send('No such command')
-        else:
+        except:
             msg1 = await message.author.send('**HasuraBot Commands List:**\n')
             commands = []
             cmdc = {}
