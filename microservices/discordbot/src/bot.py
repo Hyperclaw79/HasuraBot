@@ -244,8 +244,9 @@ class HasuraBot(discord.Client):
         Otherwise, it lists the available commands.
         """
         try:
-            command = message.content.split("{}help ".format(self.prefix))[1]
+            command = message.content.split("{}help ".format(self.prefix))[1].strip()
             cmdc = getattr(self, 'cmd_' + command, None)
+            print(command, cmdc)
             if cmdc:
                 message.author.send('```cs\n{}```'.format(dedent(cmdc.__doc__).replace('{command_prefix}', '#' + self.prefix)))
             else:
