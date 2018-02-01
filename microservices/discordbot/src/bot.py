@@ -256,14 +256,15 @@ class HasuraBot(discord.Client):
             #txt2 = ''
             #txt3 = ''
             for att in dir(self):
-                if att.startswith('cmd_') and att != 'cmd_help' and 'reload' not in att:
-                    atc = getattr(self, att)
+                if att.startswith('cmd_') and att != 'cmd_help':
                     try:
+                        atc = getattr(self, att)
                         print(atc.__doc__ + '\n')
                         cmdc[att] = dedent(atc.__doc__.split('\n')[4])
-                    except:
-                        print('No docstring written for: ' + att)
-            ''' comlen = len(cmdc)
+                    except Exception as e:
+                        #print('No docstring written for: ' + att)
+                        print(str(e))
+            ''' 
             msg5 = await self.send_message(message.channel, '__Total number of commands__: **%d**' % comlen)
             count = 0
             for att in cmdc:
@@ -284,9 +285,11 @@ class HasuraBot(discord.Client):
             await self.delete_message(msg2)
             await self.delete_message(msg3)
             await self.delete_message(msg4) '''
+            comlen = len(cmdc)
+            delme = await message.channel.send('__Total number of commands__: **{}**'.format(comlen))
             for att in cmdc:
                 txt1 += dedent('```md\n<{}>``````diff\n-{}```\n' .format(att.replace('cmd_', self.prefix),cmdc[att]))
-            delme = await message.channel.send(txt1)
+            =await delme.edit(content=txt1)
             await asyncio.sleep(300)
             await delme.delete()
 
