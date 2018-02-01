@@ -253,7 +253,6 @@ class HasuraBot(discord.Client):
             msg1 = await message.author.send('**HasuraBot Commands List:**\n')
             commands = []
             cmdc = {}
-            txt1 = ''
             #txt2 = ''
             #txt3 = ''
             for att in dir(self):
@@ -286,11 +285,14 @@ class HasuraBot(discord.Client):
             await self.delete_message(msg3)
             await self.delete_message(msg4) '''
             comlen = len(cmdc)
-            delme = await message.author.send('__Total number of commands__: **{}**'.format(comlen))
+            delme = await message.author.send('__Total number of commands__: **{}**\n'.format(comlen))
+            txt1 = "```md\n"
             for att in cmdc:
-                txt1 += dedent('```md\n<{}>``````diff\n-{}```\n' .format(att.replace('cmd_', self.prefix),cmdc[att]))
-            await delme.edit(content=txt1)
+                txt1 += dedent('[{}]( {})\n' .format(att.replace('cmd_', self.prefix),cmdc[att]))
+            txt1 += "```"    
+            await delme.edit(content=delme.content+txt1)
             await asyncio.sleep(300)
+            await msg1.delete()
             await delme.delete()
 
     async def on_message(self, message):
