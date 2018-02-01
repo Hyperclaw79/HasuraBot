@@ -289,7 +289,7 @@ class HasuraBot(discord.Client):
             delme = await message.channel.send('__Total number of commands__: **{}**'.format(comlen))
             for att in cmdc:
                 txt1 += dedent('```md\n<{}>``````diff\n-{}```\n' .format(att.replace('cmd_', self.prefix),cmdc[att]))
-            =await delme.edit(content=txt1)
+            await delme.edit(content=txt1)
             await asyncio.sleep(300)
             await delme.delete()
 
