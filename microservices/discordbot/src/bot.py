@@ -3,6 +3,7 @@ import inspect
 import aiohttp
 import os
 import asyncio
+from textwrap import dedent
 
 discord_token = os.environ["DISCORD_TOKEN"]
 
