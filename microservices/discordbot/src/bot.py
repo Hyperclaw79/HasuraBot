@@ -234,7 +234,7 @@ class HasuraBot(discord.Client):
         else:
             await message.author.send("Sorry but only the mods can prune messages. :sweat_smile:")
 
-    async def cmd_help(self, message, command=None):
+    async def cmd_help(self, message):
         """
         Usage:
             {command_prefix}help [command]
@@ -243,6 +243,10 @@ class HasuraBot(discord.Client):
         If a command is specified, it prints a help message for that command.
         Otherwise, it lists the available commands.
         """
+        try:
+            command = message.content.split("{}help ".format(self.prefix))[1]
+        except:
+            command = None    
         if command:
             cmdc = getattr(self, 'cmd_' + command, None)
             if cmdc:
