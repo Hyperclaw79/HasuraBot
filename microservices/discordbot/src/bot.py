@@ -186,9 +186,10 @@ class HasuraBot(discord.Client):
                     notif = await message.channel.send("Successfully deleted the last {} messages. :thumbsup:".format(count))
                     await asyncio.sleep(30)
                     await notif.delete()
-                except Exception as e:
+                except PermissionError:
                     await message.channel.send("Looks like I don't have permission to delete messages here. :eyes:")        
-                    print(str(e))
+                except Exception as e:
+                    print(str(e))        
             except IndexError:
                 notif = await message.channel.send("You didn't provide the count.")
                 await asyncio.sleep(30)
