@@ -246,11 +246,11 @@ class HasuraBot(discord.Client):
         if command:
             cmdc = getattr(self, 'cmd_' + command, None)
             if cmdc:
-                message.channel.send('```cs\n{}```'.format(dedent(cmdc.__doc__).replace('{command_prefix}', '#' + self.prefix)))
+                message.author.send('```cs\n{}```'.format(dedent(cmdc.__doc__).replace('{command_prefix}', '#' + self.prefix)))
             else:
-                message.channel.send('No such command')
+                message.author.send('No such command')
         else:
-            msg1 = await message.channel.send('**HasuraBot Commands List:**\n')
+            msg1 = await message.author.send('**HasuraBot Commands List:**\n')
             commands = []
             cmdc = {}
             txt1 = ''
@@ -286,7 +286,7 @@ class HasuraBot(discord.Client):
             await self.delete_message(msg3)
             await self.delete_message(msg4) '''
             comlen = len(cmdc)
-            delme = await message.channel.send('__Total number of commands__: **{}**'.format(comlen))
+            delme = await message.author.send('__Total number of commands__: **{}**'.format(comlen))
             for att in cmdc:
                 txt1 += dedent('```md\n<{}>``````diff\n-{}```\n' .format(att.replace('cmd_', self.prefix),cmdc[att]))
             await delme.edit(content=txt1)
