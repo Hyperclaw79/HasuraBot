@@ -262,9 +262,8 @@ class HasuraBot(discord.Client):
                         atc = getattr(self, att)
                         print(atc.__doc__ + '\n')
                         cmdc[att] = dedent(atc.__doc__.split('\n')[4])
-                    except Exception as e:
-                        #print('No docstring written for: ' + att)
-                        print(str(e))
+                    except:
+                        print('No docstring written for: ' + att)
             ''' 
             msg5 = await self.send_message(message.channel, '__Total number of commands__: **%d**' % comlen)
             count = 0
