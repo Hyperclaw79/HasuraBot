@@ -27,6 +27,16 @@ items:
                secretKeyRef:
                   name: hasura-secrets
                   key: discord.bot_token.key
+          - name: GUILD_ID
+            valueFrom:
+               secretKeyRef:
+                  name: hasura-secrets
+                  key: discord.guild_id.key
+          - name: LOG_CHANNEL
+            valueFrom:
+               secretKeyRef:
+                  name: hasura-secrets
+                  key: discord.log_channel.key          
           - name: CLUSTER_NAME
             value: '{{ cluster.name }}'
           image: hasura/hello-world:latest
