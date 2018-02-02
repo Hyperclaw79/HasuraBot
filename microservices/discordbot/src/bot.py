@@ -19,6 +19,8 @@ class HasuraBot(discord.Client):
         super().__init__()
         self.aiosession = aiohttp.ClientSession(loop=self.loop)
         self.http.user_agent += ' HasuraBot/1.0'
+        self.guild = os.environ["GUILD_ID"]
+        self.log = os.environ["LOG_CHANNEL"]
 
     async def on_ready(self):
         print('HasuraBot is now live!')
@@ -146,7 +148,7 @@ class HasuraBot(discord.Client):
             return clicker == user and reaction.message.id == base.id and reaction.emoji in list(roles_dict.keys())
         intent = message.content.split('{}iam '.format(self.prefix))[1].split(' ')[0].strip()
         user = message.author
-        guild = self.get_guild(407792526867693568)
+        guild = self.guild
         user = guild.get_member(user.id)             
         if intent.lower() == "intern":
             intern = [role for role in guild.roles if role.name == "hpdf-intern"][0]
@@ -177,7 +179,7 @@ class HasuraBot(discord.Client):
             await user.send("Please keep HPDF conversations in channel under the `HPDF` category.")
             await asyncio.sleep(120)
             await final.delete()
-            log = guild.get_channel(408641974640443413)
+            log = guild.get_channel(self.log)
             await log.send('User {} has been assigned `@{}` role and they chose the framework `@{}`.'.format(user.name+'#'+user.discriminator, intern, role))
         elif intent.lower() == "ca":
             ca = [role for role in guild.roles if role.name == "HasuraCA"][0]
@@ -185,7 +187,7 @@ class HasuraBot(discord.Client):
             await user.send("Successfully assigned you as `@{}`. :thumbsup:".format(ca))
             await user.send("Please keep the ca related conversation in #hasura-campus-ambassadors." + \
                             "\nFeel free to chat about general things in the public channel.")
-            log = guild.get_channel(408641974640443413)
+            log = guild.get_channel(self.log)
             await log.send('User {} has been assigned `@{}` role.'.format(user.name+'#'+user.discriminator, role))
         else:
             await user.send('You must either choose `intern` or `CA`.')    
@@ -202,8 +204,8 @@ class HasuraBot(discord.Client):
         user = message.author       
         await user.remove_roles(role)
         await user.send("Successfully removed the `@{}` role. :thumbsup:".format(role))
-        guild = self.get_guild(407792526867693568)
-        log = guild.get_channel(408641974640443413)
+        guild = self.guild
+        log = guild.get_channel(self.log)
         await log.send('User {} has removed the `@{}` role for themselves.'.format(user.name+'#'+user.discriminator, role))
 
     async def cmd_prune(self, message):
