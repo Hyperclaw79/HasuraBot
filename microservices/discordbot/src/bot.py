@@ -299,7 +299,10 @@ class HasuraBot(discord.Client):
             await delme.delete()
 
     async def on_message(self, message):
-        # we do not want the bot to reply to itself
+        if self.prefix not in message.content:
+            return
+        
+        # we do not want the bot to reply to itself or other bots
         if message.author.id == self.user.id or message.author.bot:
             return
 
