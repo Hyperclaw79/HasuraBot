@@ -300,7 +300,7 @@ class HasuraBot(discord.Client):
 
     async def on_message(self, message):
         # we do not want the bot to reply to itself
-        if message.author.id == self.user.id:
+        if message.author.id == self.user.id or message.author.bot:
             return
 
         if message.content == "(╯°□°）╯︵ ┻━┻":
