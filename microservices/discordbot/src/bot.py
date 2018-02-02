@@ -19,7 +19,7 @@ class HasuraBot(discord.Client):
         super().__init__()
         self.aiosession = aiohttp.ClientSession(loop=self.loop)
         self.http.user_agent += ' HasuraBot/1.0'
-        self.guild = os.environ["GUILD_ID"]
+        self.guild = self.get_guild(os.environ["GUILD_ID"])
         self.log = os.environ["LOG_CHANNEL"]
 
     async def on_ready(self):
