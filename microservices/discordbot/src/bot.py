@@ -146,7 +146,7 @@ class HasuraBot(discord.Client):
         async with message.channel.typing():
             target = message.channel.history(limit=1, before=message).next()
             await message.delete()
-            reactions = message.replace('{}react ','').split(' ')
+            reactions = message.content.replace('{}react ','').split(' ')
             for reaction in reactions:
                 try:
                     await target.add_reaction(reaction)
