@@ -201,7 +201,8 @@ class HasuraBot(discord.Client):
         param = message.content.split('{}iamnot '.format(self.prefix))[1].split(' ')[0].strip()
         guild = self.get_guild(int(os.environ["GUILD_ID"]))
         role = [role for role in guild.roles if role.name.lower() == param.lower()][0]  
-        user = message.author       
+        user = message.author
+        user = guild.get_member(user.id)       
         await user.remove_roles(role)
         await user.send("Successfully removed the `@{}` role. :thumbsup:".format(role))
         log = guild.get_channel(int(os.environ["LOG_CHANNEL"]))
