@@ -199,11 +199,11 @@ class HasuraBot(discord.Client):
         Remove a role from yourself.
         """
         param = message.content.split('{}iamnot '.format(self.prefix))[1].split(' ')[0].strip()
+        guild = self.get_guild(int(os.environ["GUILD_ID"]))
         role = [role for role in guild.roles if role.name.lower() == param.lower()][0]  
         user = message.author       
         await user.remove_roles(role)
         await user.send("Successfully removed the `@{}` role. :thumbsup:".format(role))
-        guild = self.get_guild(int(os.environ["GUILD_ID"]))
         log = guild.get_channel(int(os.environ["LOG_CHANNEL"]))
         await log.send('User {} has removed the `@{}` role for themselves.'.format(user.name+'#'+user.discriminator, role))
 
