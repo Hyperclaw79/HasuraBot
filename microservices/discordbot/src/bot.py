@@ -136,6 +136,23 @@ class HasuraBot(discord.Client):
           s = t+l[i%2]
           await m1.edit(content=s)
 
+    async def cmd_react(self, message):
+        """
+        Usage:
+            {command_prefix}react [reaction1 reaction2 ....]
+                        
+        Add a list of reactions to the previous message. Separate the emojis with spaces.
+        """
+        async with message.channel.typing():
+            target = message.channel.history(limit=1, before=message).next()
+            await message.delete()
+            reactions = message.replace('{}react ','').split(' ')
+            for reaction in reactions:
+                try:
+                    await target.add_reaction(reaction)
+                except:
+                    pass    
+        
     async def cmd_iam(self, message):
         """
         Usage:
