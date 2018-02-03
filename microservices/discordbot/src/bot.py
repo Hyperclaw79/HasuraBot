@@ -150,8 +150,8 @@ class HasuraBot(discord.Client):
             for reaction in reactions:
                 try:
                     await target.add_reaction(reaction)
-                except:
-                    pass    
+                except Exception as e:
+                    print(str(e))    
         
     async def cmd_iam(self, message):
         """
