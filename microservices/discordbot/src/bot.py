@@ -317,12 +317,11 @@ class HasuraBot(discord.Client):
             await delme.delete()
 
     async def on_message(self, message):
-        if self.prefix not in message.content:
+        if self.prefix not in message.content and message.content != "(╯°□°）╯︵ ┻━┻":
             return
         
         # we do not want the bot to reply to itself or other bots
-        if message.author.id == self.user.id or message.author.bot and message.content != "(╯°□°）╯︵ ┻━┻":
-            print(message.content)
+        if message.author.id == self.user.id or message.author.bot:
             return
 
         if message.content == "(╯°□°）╯︵ ┻━┻":
