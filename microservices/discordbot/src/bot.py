@@ -322,6 +322,7 @@ class HasuraBot(discord.Client):
         
         # we do not want the bot to reply to itself or other bots
         if message.author.id == self.user.id or message.author.bot and message.content != "(╯°□°）╯︵ ┻━┻":
+            print(message.content)
             return
 
         if message.content == "(╯°□°）╯︵ ┻━┻":
