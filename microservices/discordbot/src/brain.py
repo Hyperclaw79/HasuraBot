@@ -26,7 +26,7 @@ class HyperAI:
 
         async with self.sess as session:
             async with session.post('https://cleverbot.io/1.0/ask', json=body) as resp:
-                await r = resp.json()
+                r = await resp.json()
 
         if r['status'] == 'success':
             return r['response']
