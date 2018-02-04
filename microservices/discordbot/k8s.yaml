@@ -36,7 +36,17 @@ items:
             valueFrom:
                secretKeyRef:
                   name: hasura-secrets
-                  key: discord.log_channel.key          
+                  key: discord.log_channel.key
+          - name: BRAIN_USER
+            valueFrom:
+               secretKeyRef:
+                  name: hasura-secrets
+                  key: cleverbot.user_id.key
+          - name: BRAIN_KEY
+            valueFrom:
+               secretKeyRef:
+                  name: hasura-secrets
+                  key: cleverbot.user_key.key                  
           - name: CLUSTER_NAME
             value: '{{ cluster.name }}'
           image: hasura/hello-world:latest
