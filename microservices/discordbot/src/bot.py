@@ -320,7 +320,7 @@ class HasuraBot(discord.Client):
         if self.prefix not in message.content and message.content != "(╯°□°）╯︵ ┻━┻" and not self.mentioned_in(message):
             return
         
-        if self.mentioned_in(message):
+        if self.user.mentioned_in(message):
             await message.channel.send("Hello {}. :wave::skin-tone-1:")
 
         # we do not want the bot to reply to itself or other bots
