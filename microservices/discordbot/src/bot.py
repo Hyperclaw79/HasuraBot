@@ -317,9 +317,12 @@ class HasuraBot(discord.Client):
             await delme.delete()
 
     async def on_message(self, message):
-        if self.prefix not in message.content and message.content != "(╯°□°）╯︵ ┻━┻":
+        if self.prefix not in message.content and message.content != "(╯°□°）╯︵ ┻━┻" and not self.mentioned_in(message):
             return
         
+        if self.mentioned_in(message):
+            await message.channel.send("Hello {}. :wave::skin-tone-1:")
+
         # we do not want the bot to reply to itself or other bots
         if message.author.id == self.user.id or message.author.bot:
             return
