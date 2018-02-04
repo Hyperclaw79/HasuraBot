@@ -1,21 +1,22 @@
-import requests
 import json
+import aiohttp
 
 class HyperAI:
-    def __init__(self, user, key, nick=None):
+    async def __init__(self, user, key, nick=None):
         self.user = user
         self.key = key
         self.nick = nick
-        self.sess = requests.Session()
+        self.sess = aiohttp.ClientSession()
         body = {
             'user': user,
             'key': key,
             'nick': nick
         }
-        self.sess.post('https://cleverbot.io/1.0/create', json=body)
+        async with self.sess as session:
+            await session.post('https://cleverbot.io/1.0/create', json=body)
 
 
-    def query(self, text):
+    async def query(self, text):
         body = {
             'user': self.user,
             'key': self.key,
@@ -23,8 +24,9 @@ class HyperAI:
             'text': text
         }
 
-        r = self.sess.post('https://cleverbot.io/1.0/ask', json=body)
-        r = json.loads(r.text)
+        async with self.sess as session:
+            async with session.post('https://cleverbot.io/1.0/ask', json=body) as resp:
+                await r = resp.json()
 
         if r['status'] == 'success':
             return r['response']
