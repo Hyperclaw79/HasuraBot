@@ -4,6 +4,7 @@ import aiohttp
 import os
 import asyncio
 from textwrap import dedent
+from brain import HyperAI
 
 discord_token = os.environ["DISCORD_TOKEN"]
 
@@ -19,6 +20,8 @@ class HasuraBot(discord.Client):
         super().__init__()
         self.aiosession = aiohttp.ClientSession(loop=self.loop)
         self.http.user_agent += ' HasuraBot/1.0'
+        self.brain = HyperAI(os.environ["BRAIN_USER"],os.environ["BRAIN_KEY"],"HyperAI")        
+
         
 
     async def on_ready(self):
@@ -321,7 +324,9 @@ class HasuraBot(discord.Client):
             return
         
         if self.user.mentioned_in(message):
-            await message.channel.send("Hello {}. :wave::skin-tone-1:".format(message.author.mention))
+            async with message.channel.typing():
+                response = self.brain.query(message)
+                await message.channel.send("{} {}".format(message.author.mention,response))
 
         # we do not want the bot to reply to itself or other bots
         if message.author.id == self.user.id or message.author.bot:
