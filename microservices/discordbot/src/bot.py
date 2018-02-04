@@ -317,7 +317,7 @@ class HasuraBot(discord.Client):
             await delme.delete()
 
     async def on_message(self, message):
-        if self.prefix not in message.content and message.content != "(╯°□°）╯︵ ┻━┻" and not self.mentioned_in(message):
+        if self.prefix not in message.content and message.content != "(╯°□°）╯︵ ┻━┻" and not self.user.mentioned_in(message):
             return
         
         if self.user.mentioned_in(message):
