@@ -321,7 +321,7 @@ class HasuraBot(discord.Client):
             return
         
         if self.user.mentioned_in(message):
-            await message.channel.send("Hello {}. :wave::skin-tone-1:")
+            await message.channel.send("Hello {}. :wave::skin-tone-1:".format(message.author.mention))
 
         # we do not want the bot to reply to itself or other bots
         if message.author.id == self.user.id or message.author.bot:
