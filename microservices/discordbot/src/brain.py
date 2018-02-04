@@ -1,8 +1,9 @@
 import json
+import requests
 import aiohttp
 
 class HyperAI:
-    async def __init__(self, user, key, nick=None):
+    def __init__(self, user, key, nick=None):
         self.user = user
         self.key = key
         self.nick = nick
@@ -12,8 +13,7 @@ class HyperAI:
             'key': key,
             'nick': nick
         }
-        async with self.sess as session:
-            await session.post('https://cleverbot.io/1.0/create', json=body)
+        requests.post('https://cleverbot.io/1.0/create', json=body)
 
 
     async def query(self, text):
