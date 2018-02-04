@@ -326,6 +326,7 @@ class HasuraBot(discord.Client):
         if self.user.mentioned_in(message):
             async with message.channel.typing():
                 response = self.brain.query(message)
+                print(response)
                 await message.channel.send("{} {}".format(message.author.mention,response))
 
         # we do not want the bot to reply to itself or other bots
