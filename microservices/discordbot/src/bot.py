@@ -322,7 +322,7 @@ class HasuraBot(discord.Client):
         if self.prefix not in message.content and message.content != "(╯°□°）╯︵ ┻━┻" and not self.user.mentioned_in(message):
             return
         
-        if self.user.mentioned_in(message) and not mention_everyone:
+        if self.user.mentioned_in(message) and not message.mention_everyone:
             async with message.channel.typing():
                 response = await self.brain.query(message.content)
                 await message.channel.send("{} {}".format(message.author.mention,response))
