@@ -79,7 +79,14 @@ class HasuraBot(discord.Client):
         chan = message.channel
         await message.delete()
         mesg = message_content.replace('{}wow'.format(self.prefix), '')
-
+        symbol_dict = {
+            '!':":exclamation:",
+            '?':":question:",
+            '+':":heavy_plus_sign:",
+            '-':":heavy_minus_sign:"
+            '*':":asterisk:",
+            '#':":hash:"
+        }
         t = ""
         nums = ['zero','one','two','three','four','five','six','seven','eight','nine']
         for c in mesg:
@@ -92,6 +99,8 @@ class HasuraBot(discord.Client):
               c = ":regional_indicator_{}: ".format(c)
            elif int(c)>=0 and int(c)<=9: 
               c = ":{}:".format(nums[int(c)])
+           elif c in symbol_dict.keys():
+               c = symbol_dict[c]   
            t = t + c
         await chan.send('\n{}'.format(t))            
 
@@ -118,11 +127,12 @@ class HasuraBot(discord.Client):
        await mes.edit(content=":apple::pen_ballpoint:")
        await asyncio.sleep(1)	   
        await mes.edit(content=":pineapple::pen_ballpoint:")
-       await asyncio.sleep(2.5) 	   
-       await mes.edit(content=":pen_ballpoint:")		
-       await mes.edit(content=":pen_ballpoint::pineapple:")		
-       await mes.edit(content=":pen_ballpoint::pineapple::apple:")	   
-       await mes.edit(content=":pen_ballpoint::pineapple::apple::pen_ballpoint:")    
+       await asyncio.sleep(2.5)
+       contents = [":pen_ballpoint:",":pineapple:",":apple:",":pen_ballpoint:"]
+       initial = ""
+       for content in contents:
+        await mes.edit(content=initial+content)
+        initial = mes.content     	     
 
     async def cmd_moonwalk(self, message):
        """
@@ -147,13 +157,24 @@ class HasuraBot(discord.Client):
         Add a list of reactions to the previous message. Separate the emojis with spaces.
         """
         target = await message.channel.history(limit=1, before=message).next()
-        await message.delete()
-        reactions = message.content.replace('{}react ','').split(' ')
-        for reaction in reactions:
-            try:
-                await target.add_reaction(reaction)
-            except:
-                pass    
+        if "animated" in message.content:
+            emoji_dict = {}
+            for emoji in list(message.guild.emojis):
+                emoji_dict[emoji.name] = emoji
+            reactions = message.content.replace('{}react ','').split(' ')[1:]
+            for reaction in reactions.replace(':',''):
+                try:
+                    await target.add_reaction(emoji_dict[reaction])
+                except Exception as e:
+                    print(str(e))    
+        else:
+            reactions = message.content.replace('{}react ','').split(' ')
+            await message.delete()
+            for reaction in reactions:
+                try:
+                    await target.add_reaction(reaction)
+                except Exception as e:
+                    print(str(e))    
     
     async def cmd_iam(self, message):
         """
@@ -223,9 +244,9 @@ class HasuraBot(discord.Client):
         user = message.author
         user = guild.get_member(user.id)       
         await user.remove_roles(role)
-        await user.send("Successfully removed the `@{}` role. :thumbsup:".format(role))
         log = guild.get_channel(int(os.environ["LOG_CHANNEL"]))
         await log.send('User {} has removed the `@{}` role for themselves.'.format(user.name+'#'+user.discriminator, role))
+        await user.send("Successfully removed the `@{}` role. :thumbsup:".format(role))
 
     async def cmd_prune(self, message):
         """
@@ -283,31 +304,9 @@ class HasuraBot(discord.Client):
                 if att.startswith('cmd_') and att != 'cmd_help':
                     try:
                         atc = getattr(self, att)
-                        print(atc.__doc__ + '\n')
                         cmdc[att] = dedent(atc.__doc__.split('\n')[4])
                     except:
-                        print('No docstring written for: ' + att)
-            ''' 
-            msg5 = await self.send_message(message.channel, '__Total number of commands__: **%d**' % comlen)
-            count = 0
-            for att in cmdc:
-                count += 1
-                if count < 15:
-                    txt1 += dedent('```md\n<%s>```' % att.replace('cmd_', self.config.command_prefix) + '```diff\n-%s```\n' % cmdc[att])
-                elif count > 15 and count < 30:
-                    txt2 += dedent('```md\n<%s>```' % att.replace('cmd_', self.config.command_prefix) + '```diff\n-%s```\n' % cmdc[att])
-                else:
-                    txt3 += dedent('```md\n<%s>```' % att.replace('cmd_', self.config.command_prefix) + '```diff\n-%s```\n' % cmdc[att])
-
-            msg2 = await (self.send_message(message.channel, txt1))
-            msg3 = await (self.send_message(message.channel, txt2))
-            msg4 = await (self.send_message(message.channel, txt3))
-            await asyncio.sleep(300)
-            await self.delete_message(msg1)
-            await self.delete_message(msg5)
-            await self.delete_message(msg2)
-            await self.delete_message(msg3)
-            await self.delete_message(msg4) '''
+                        print('Skipping hidden command: ' + att)
             comlen = len(cmdc)
             delme = await message.author.send('__Total number of commands__: **{}**\n'.format(comlen))
             txt1 = "```md\n"
@@ -323,7 +322,7 @@ class HasuraBot(discord.Client):
         if self.prefix not in message.content and message.content != "(╯°□°）╯︵ ┻━┻" and not self.user.mentioned_in(message):
             return
         
-        if self.user.mentioned_in(message):
+        if self.user.mentioned_in(message) and not mention_everyone:
             async with message.channel.typing():
                 response = await self.brain.query(message.content)
                 await message.channel.send("{} {}".format(message.author.mention,response))
@@ -347,10 +346,6 @@ class HasuraBot(discord.Client):
         h_kwargs = {}                   # Dict for group testing all the attrs.
         if params.pop('message',None):
             h_kwargs['message'] = message
-        if params.pop('channel',None):
-            h_kwargs['channel'] = message.channel
-        if params.pop('guild',None):
-            h_kwargs['guild'] = message.guild
         if params.pop('mentions',None):
             h_kwargs['mentions'] = list(map(message.server.get_member, message.raw_mentions)) # Gets the user for the raw mention and repeats for every user in the guild.            
         if params.pop('args',None):
