@@ -90,7 +90,9 @@ class HasuraBot(discord.Client):
         t = ""
         nums = ['zero','one','two','three','four','five','six','seven','eight','nine']
         for c in mesg:
-           if ord(c)<90 and ord(c)>=65:
+           if c in symbol_dict.keys():
+               c = symbol_dict[c]   
+           elif ord(c)<90 and ord(c)>=65:
               c = chr(ord(c)+32)
               c = ":regional_indicator_{}: ".format(c)
            elif c == " ":
@@ -99,8 +101,6 @@ class HasuraBot(discord.Client):
               c = ":regional_indicator_{}: ".format(c)
            elif int(c)>=0 and int(c)<=9: 
               c = ":{}:".format(nums[int(c)])
-           elif c in symbol_dict.keys():
-               c = symbol_dict[c]   
            t = t + c
         await chan.send('\n{}'.format(t))            
 
@@ -162,7 +162,7 @@ class HasuraBot(discord.Client):
             for emoji in list(message.guild.emojis):
                 emoji_dict[emoji.name] = emoji
             reactions = message.content.replace('{}react ','').split(' ')[1:]
-            for reaction in reactions.replace(':',''):
+            for reaction in reactions:
                 try:
                     await target.add_reaction(emoji_dict[reaction])
                 except Exception as e:
