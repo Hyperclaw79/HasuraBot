@@ -83,7 +83,7 @@ class HasuraBot(discord.Client):
             '!':":exclamation:",
             '?':":question:",
             '+':":heavy_plus_sign:",
-            '-':":heavy_minus_sign:"
+            '-':":heavy_minus_sign:",
             '*':":asterisk:",
             '#':":hash:"
         }
