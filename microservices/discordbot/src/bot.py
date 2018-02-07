@@ -171,9 +171,11 @@ class HasuraBot(discord.Client):
     async def cmd_react(self, message):
         """
         Usage:
-            {command_prefix}react [reaction1 reaction2 ....]
+            {command_prefix}react <animated> [reaction1 reaction2 ....]
                         
         Add a list of reactions to the previous message. Separate the emojis with spaces.
+        For an animated emoji, add the keyword animated and use the emoji name. 
+            Eg. aww_yeah instead of :aww_yeah:
         """
         target = await message.channel.history(limit=1, before=message).next()
         if "animated" in message.content:
@@ -181,6 +183,7 @@ class HasuraBot(discord.Client):
             for emoji in list(message.guild.emojis):
                 emoji_dict[emoji.name] = emoji
             reactions = message.content.replace('{}react ','').split(' ')[1:]
+            await message.delete()
             for reaction in reactions:
                 try:
                     await target.add_reaction(emoji_dict[reaction])
