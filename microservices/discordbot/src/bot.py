@@ -345,9 +345,17 @@ class HasuraBot(discord.Client):
         Usage:
             {command_prefix}hub <list [quickstart | bot]>
         
-        Fetches descriptions of quickstarts or bots available on Hasura Hub.
+        Fetches descriptions of quickstarts or bots (more to come soon) available on Hasura Hub.
         If no arguments are specified, opens up an interactive embed for you to make a choice.
         To get only the list, add the keyword list and type either quickstart or bot.
+        Examples:
+            To get a list of all bots on the hub:
+                {command_prefix}hub list bots
+            To get a list of all quickstarts on the hub:
+                {command_prefix}hub list quickstart
+            To get descriptions along with the project names:
+                {command_prefix}hub
+                This will open an interactable menu.      
         """
         def check(reaction, user):
             return reaction.message.id == base.id and user == message.author and reaction.emoji in reaction_list
