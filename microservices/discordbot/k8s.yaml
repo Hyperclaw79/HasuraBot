@@ -46,7 +46,12 @@ items:
             valueFrom:
                secretKeyRef:
                   name: hasura-secrets
-                  key: cleverbot.user_key.key                  
+                  key: cleverbot.user_key.key   
+          - name: ALOGIA_KEY
+            valueFrom:
+               secretKeyRef:
+                  name: hasura-secrets
+                  key: alogia.api_token.key
           - name: CLUSTER_NAME
             value: '{{ cluster.name }}'
           image: hasura/hello-world:latest

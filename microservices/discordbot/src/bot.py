@@ -22,7 +22,7 @@ class HasuraHub:
         headers = {
             'x-algolia-agent':'HasuraBot',
             'x-algolia-application-id':'WCBB1VVLRC',
-            'x-algolia-api-key':'fc0d6ec5994be6dfa509dfa7ce3b2b47'
+            'x-algolia-api-key': os.environ["ALOGIA_KEY"]
         }
         self.sess = requests.Session()
         self.sess.headers.update(headers)
@@ -47,82 +47,6 @@ class HasuraBot(discord.Client):
         print('HasuraBot is now live!')
         game = discord.Game(name="the byte crunching game. #HasuraFTW")
         await self.change_presence(game=game)
-
-
-    async def cmd_hub(self, message):
-        
-        def check(reaction, user):
-            return reaction.message.id == base.id and user == message.author and reaction.emoji in reaction_list
-
-        async def paginator(base,pointers,embeds):
-            def reaction_check(reaction,user):
-                return user == message.author and reaction.message.id == base.id and reaction.emoji in pointers
-            cursor = 0
-            while True: 
-                reaction, user = await self.wait_for('reaction_add',check=reaction_check)
-                op = pointers.index(reaction.emoji)
-                if op == 1 and cursor < len(embeds) - 1:
-                    cursor += 1
-                    await base.edit(embed=embeds[cursor])
-                elif op == 0 and cursor > 0:
-                    cursor -= 1
-                    await base.edit(embed=embeds[cursor])
-                else:
-                    pass
-        
-        def embed_generator(flatten,project_list,current,total):
-            hub_embed = discord.Embed(title="List of Projects",description="\u200B",color=15728640)
-            if flatten:
-                for project in project_list:
-                    val = '\u200B'
-                    hub_embed.add_field(name=project["name"], value=val, inline=False)
-            else:
-                for project in project_list:
-                    if len(project["description"]) <= 1024:
-                        hub_embed.add_field(name=project["name"], value=project["description"])
-                    else:
-                        val = '\n'.join(project["description"].split('\n\n')[:3])
-                        hub_embed.add_field(name=project["name"], value=val)
-                    hub_embed.add_field(name="\u200B", value="\u200B\n", inline=False)
-            hub_embed.set_footer(text="{}/{}".format(current,total),icon_url="http://www.iconsplace.com/download/red-list-256.png")
-            return hub_embed
-
-        async def _main(param,flatten):
-            if not flatten:
-                choices = discord.Embed(title="Choose the corresponding option:",
-                    description="1. Quickstarts\n2. Bots",
-                    color=15728640)
-                choices.set_thumbnail(url="https://hasura.io/rstatic/resources/boilerplates.png")
-                base = await message.channel.send(content=message.author.mention,embed=choices)
-                reaction_list = ['1\u20e3','2\u20e3']
-                param_list = ['hasura/hello','bot']
-                for reaction in reaction_list:
-                    await base.add_reaction(reaction)
-                reaction, user = await self.wait_for('reaction_add',check=check)
-                choice = reaction_list.index(reaction.emoji)
-                projects = self.hubber.query(param=param_list[choice])
-                await base.clear_reactions()
-            else:
-                base = await message.channel.send("{} Fetching results. Please wait. :hourglass_flowing_sand:".format(message.author.mention))
-                if param.lower() in ["quickstart","quickstarts"]:
-                    projects = self.hubber.query(param="hasura/hello")
-                elif param.lower() in ["bot","bots"]:
-                    projects = self.hubber.query(param="bot")
-            embeds = [embed_generator(flatten,projects[i:i+4],int(i/4)+1,math.ceil(len(projects)/4)) for i in range(0,len(projects),4) ]
-            await base.edit(content=message.author.mention,embed=embeds[0])
-            pointers = ['👈','👉']
-            for pointer in pointers:
-                await base.add_reaction(pointer)
-            asyncio.ensure_future(paginator(base,pointers,embeds))
-        
-        if "list" in message.content:
-            param = message.content.replace('{}hub list '.format(self.prefix),'').strip()
-            param = param.split(' ')[0]
-            flatten = True
-        else:
-            param = None
-            flatten = False
-        await _main(param,flatten)        
 
 
     async def cmd_ping(self, message):
@@ -412,6 +336,91 @@ class HasuraBot(discord.Client):
             await asyncio.sleep(300)
             await msg1.delete()
             await delme.delete()
+
+    async def cmd_hub(self, message):
+        """
+        Usage:
+            {command_prefix}hub <list [quickstart | bot]>
+        
+        Fetches descriptions of quickstarts or bots available on Hasura Hub.
+        If no arguments are specified, opens up an interactive embed for you to make a choice.
+        To get only the list, add the keyword list and type either quickstart or bot.
+        """
+        def check(reaction, user):
+            return reaction.message.id == base.id and user == message.author and reaction.emoji in reaction_list
+
+        async def paginator(base,pointers,embeds):
+            def reaction_check(reaction,user):
+                return user == message.author and reaction.message.id == base.id and reaction.emoji in pointers
+            cursor = 0
+            while True: 
+                reaction, user = await self.wait_for('reaction_add',check=reaction_check)
+                op = pointers.index(reaction.emoji)
+                if op == 1 and cursor < len(embeds) - 1:
+                    cursor += 1
+                    await base.edit(embed=embeds[cursor])
+                elif op == 0 and cursor > 0:
+                    cursor -= 1
+                    await base.edit(embed=embeds[cursor])
+                else:
+                    pass
+        
+        def embed_generator(flatten,project_list,current,total):
+            hub_embed = discord.Embed(title="List of Projects",description="\u200B",color=15728640)
+            if flatten:
+                for project in project_list:
+                    val = '\u200B'
+                    hub_embed.add_field(name=project["name"], value=val, inline=False)
+            else:
+                for project in project_list:
+                    if len(project["description"]) <= 1024:
+                        hub_embed.add_field(name=project["name"], value=project["description"])
+                    else:
+                        val = '\n'.join(project["description"].split('\n\n')[:3])
+                        hub_embed.add_field(name=project["name"], value=val)
+                    hub_embed.add_field(name="\u200B", value="\u200B\n", inline=False)
+            hub_embed.set_footer(text="{}/{}".format(current,total),icon_url="http://www.iconsplace.com/download/red-list-256.png")
+            return hub_embed
+
+        async def _main(param,flatten):
+            if not flatten:
+                choices = discord.Embed(title="Choose the corresponding option:",
+                    description="1. Quickstarts\n2. Bots",
+                    color=15728640)
+                choices.set_thumbnail(url="https://hasura.io/rstatic/resources/boilerplates.png")
+                base = await message.channel.send(content=message.author.mention,embed=choices)
+                reaction_list = ['1\u20e3','2\u20e3']
+                param_list = ['hasura/hello','bot']
+                for reaction in reaction_list:
+                    await base.add_reaction(reaction)
+                reaction, user = await self.wait_for('reaction_add',check=check)
+                choice = reaction_list.index(reaction.emoji)
+                projects = self.hubber.query(param=param_list[choice])
+                await base.clear_reactions()
+            else:
+                base = await message.channel.send("{} Fetching results. Please wait. :hourglass_flowing_sand:".format(message.author.mention))
+                if param.lower() in ["quickstart","quickstarts"]:
+                    projects = self.hubber.query(param="hasura/hello")
+                elif param.lower() in ["bot","bots"]:
+                    projects = self.hubber.query(param="bot")
+            embeds = [embed_generator(flatten,projects[i:i+4],int(i/4)+1,math.ceil(len(projects)/4)) for i in range(0,len(projects),4) ]
+            await base.edit(content=message.author.mention,embed=embeds[0])
+            pointers = ['👈','👉']
+            for pointer in pointers:
+                await base.add_reaction(pointer)
+            asyncio.ensure_future(paginator(base,pointers,embeds))
+        
+        if "list" in message.content:
+            param = message.content.replace('{}hub list '.format(self.prefix),'').strip()
+            param = param.split(' ')[0]
+            flatten = True
+        else:
+            param = None
+            flatten = False
+        await _main(param,flatten)        
+
+
+
 
     async def on_message(self, message):
         if self.prefix not in message.content and message.content != "(╯°□°）╯︵ ┻━┻" and not self.user.mentioned_in(message):
