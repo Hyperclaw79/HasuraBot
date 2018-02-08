@@ -16,6 +16,52 @@ class Response:
         self.reply = reply
         self.delete_after = delete_after
 
+class Paginator:
+    def __init__(self, message, base, embeds, obj):
+        self.message = message
+        self.base = base
+        self.pointers = ['👈','👉']
+        self.embeds = embeds
+        self.cursor = 0
+        self.obj = obj
+
+    async def _add_handler(self):
+        def reaction_check(reaction,user):
+            return user == self.message.author and reaction.message.id == self.base.id and reaction.emoji in self.pointers
+        while True: 
+            reaction, user = await discord.Client.wait_for(self.obj, event='reaction_add', check=reaction_check)
+            op = self.pointers.index(reaction.emoji)
+            if op == 1 and self.cursor < len(self.embeds) - 1:
+                self.cursor += 1
+                await self.base.edit(embed=self.embeds[self.cursor])
+            elif op == 0 and self.cursor > 0:
+                self.cursor -= 1
+                await self.base.edit(embed=self.embeds[self.cursor])
+            else:
+                pass
+
+    async def _remove_handler(self):
+        def reaction_check(reaction,user):
+            return user == self.message.author and reaction.message.id == self.base.id and reaction.emoji in self.pointers
+        while True: 
+            reaction, user = await discord.Client.wait_for(self.obj, event='reaction_remove', check=reaction_check)
+            op = self.pointers.index(reaction.emoji)
+            if op == 1 and self.cursor < len(self.embeds) - 1:
+                self.cursor += 1
+                await self.base.edit(embed=self.embeds[self.cursor])
+            elif op == 0 and self.cursor > 0:
+                self.cursor -= 1
+                await base.edit(embed=self.embeds[self.cursor])
+            else:
+                pass                    
+
+    async def run(self):
+        await self.base.edit(content=self.message.author.mention,embed=self.embeds[0])
+        for pointer in self.pointers:
+            await self.base.add_reaction(pointer)
+        asyncio.ensure_future(self._add_handler())
+        asyncio.ensure_future(self._remove_handler())            
+
 class HasuraHub:
     def __init__(self):
         self.url = "https://wcbb1vvlrc-dsn.algolia.net/1/indexes/hasura_apps_hub/query"
@@ -227,9 +273,16 @@ class HasuraBot(discord.Client):
                             express_icon: express,
                             flask_icon: flask
                         }
+            existing = [role for role in list(roles_dict.values()) if role in user.roles]            
             await user.add_roles(intern)
-            base = await user.send("Hey {}, you've successfully been assigned the `@hpdf-intern` role.".format(user.mention) + \
+            if intern not in user.roles:
+                base = await user.send("Hey {}, you've successfully been assigned the `@hpdf-intern` role.".format(user.mention) + \
                     "Please react to this message with your appropriate framework.")
+            elif len(existing) > 0:
+                base = await user.send("You already have a framework assigned to you." + \
+                    "Please use `*iamnot {}` before trying this command.".format(existing[0]))
+            else:
+                base = await user.send("Please react to this message with your appropriate framework.")
             for reaction in list(roles_dict.keys()):
                 await base.add_reaction(reaction)
             reaction, clicker = await self.wait_for('reaction_add', check=check1)
@@ -358,22 +411,6 @@ class HasuraBot(discord.Client):
                 This will open an interactable menu.      
         """
         
-        async def paginator(base,pointers,embeds):
-            def reaction_check(reaction,user):
-                return user == message.author and reaction.message.id == base.id and reaction.emoji in pointers
-            cursor = 0
-            while True: 
-                reaction, user = await self.wait_for('reaction_add',check=reaction_check)
-                op = pointers.index(reaction.emoji)
-                if op == 1 and cursor < len(embeds) - 1:
-                    cursor += 1
-                    await base.edit(embed=embeds[cursor])
-                elif op == 0 and cursor > 0:
-                    cursor -= 1
-                    await base.edit(embed=embeds[cursor])
-                else:
-                    pass
-        
         def embed_generator(flatten,project_list,current,total):
             hub_embed = discord.Embed(title="List of Projects",description="\u200B",color=15728640)
             if flatten:
@@ -416,11 +453,8 @@ class HasuraBot(discord.Client):
                 elif param.lower() in ["bot","bots"]:
                     projects = self.hubber.query(param="bot")
             embeds = [embed_generator(flatten,projects[i:i+4],int(i/4)+1,math.ceil(len(projects)/4)) for i in range(0,len(projects),4) ]
-            await base.edit(content=message.author.mention,embed=embeds[0])
-            pointers = ['👈','👉']
-            for pointer in pointers:
-                await base.add_reaction(pointer)
-            asyncio.ensure_future(paginator(base,pointers,embeds))
+            pager = Paginator(message, base, embeds, self)
+            await pager.run()
         
         if "list" in message.content:
             param = message.content.replace('{}hub list '.format(self.prefix),'').strip()
