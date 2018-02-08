@@ -256,7 +256,8 @@ class HasuraBot(discord.Client):
         intent = message.content.split('{}iam '.format(self.prefix))[1].split(' ')[0].strip()
         user = message.author
         guild = self.get_guild(int(os.environ["GUILD_ID"]))
-        user = guild.get_member(user.id)             
+        user = guild.get_member(user.id)
+        framework_change = False             
         if intent.lower() == "intern":
             intern = [role for role in guild.roles if role.name == "hpdf-intern"][0]
             react = [role for role in guild.roles if role.name == "hpdf-reactjs"][0]
@@ -274,11 +275,11 @@ class HasuraBot(discord.Client):
                             flask_icon: flask
                         }
             existing = [role for role in list(roles_dict.values()) if role in user.roles]
-            print(str(list(roles_dict.values())),str(user.roles),existing)            
             await user.add_roles(intern)
             if intern not in user.roles:
                 base = await user.send("Hey {}, you've successfully been assigned the `@hpdf-intern` role.".format(user.mention) + \
                     "Please react to this message with your appropriate framework.")
+                framework_change = True    
             elif len(existing) > 0:
                 base = await user.send("You already have a framework assigned to you." + \
                     "Please use `*iamnot {}` before trying this command.".format(existing[0]))
@@ -296,7 +297,10 @@ class HasuraBot(discord.Client):
             await asyncio.sleep(120)
             await final.delete()
             log = guild.get_channel(int(os.environ["LOG_CHANNEL"]))
-            await log.send('User {} has been assigned `@{}` role and they chose the framework `@{}`.'.format(user.name+'#'+user.discriminator, intern, role))
+            content = "User {} has switched to the {} framework.".format(user.name+'#'+user.discriminator,role.replace("hpdf-",''))
+            if framework_change:
+                content = content.replace("switched to","been assigned `@hpdf-intern` role and they chose")
+            await log.send(content)
         elif intent.lower() == "ca":
             ca = [role for role in guild.roles if role.name == "HasuraCA"][0]
             await user.add_roles(ca)
