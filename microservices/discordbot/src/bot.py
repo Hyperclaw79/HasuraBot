@@ -293,7 +293,7 @@ class HasuraBot(discord.Client):
             role = roles_dict[reaction.emoji]
             await user.add_roles(role)
             await base.delete()
-            content = "{}, you've been successfully assigned the `@{}` role. :thumbsup:".format(user.mention, role.name)) + \
+            content = "{}, you've been successfully assigned the `@{}` role. :thumbsup:".format(user.mention, role.name) + \
             "\nPlease keep HPDF conversations in channel under the `HPDF` category."
             final = await user.send(content)
             await asyncio.sleep(120)
@@ -308,7 +308,7 @@ class HasuraBot(discord.Client):
                 await user.send("You already have the `@Hasura CA` role.")
                 return    
             await user.add_roles(ca)
-            content = "Successfully assigned you as `@{}`. :thumbsup:".format(ca)) + \
+            content = "Successfully assigned you as `@{}`. :thumbsup:".format(ca) + \
                 "\nPlease keep the ca related conversation in #hasura-campus-ambassadors." + \
                 "\nFeel free to chat about general things in the public channel."
             await user.send(content)
