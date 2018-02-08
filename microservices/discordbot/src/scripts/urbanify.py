@@ -27,6 +27,12 @@ class Urban:
             solutions = [sortme[0]]
             print(solutions)
         else:
-            spliced = sortme[0:5]
+            i = 5
+            while True:
+                if i <= len(sortme):
+                    spliced = sortme[0:i]
+                    break
+                else:
+                    i -= 1    
             solutions = sorted(spliced, key = lambda k:len(k["meaning"]))
         return solutions
