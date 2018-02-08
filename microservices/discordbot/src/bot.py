@@ -357,9 +357,7 @@ class HasuraBot(discord.Client):
                 {command_prefix}hub
                 This will open an interactable menu.      
         """
-        def check(reaction, user):
-            return reaction.message.id == base.id and user == message.author and reaction.emoji in reaction_list
-
+        
         async def paginator(base,pointers,embeds):
             def reaction_check(reaction,user):
                 return user == message.author and reaction.message.id == base.id and reaction.emoji in pointers
@@ -394,6 +392,9 @@ class HasuraBot(discord.Client):
             return hub_embed
 
         async def _main(param,flatten):
+            def check(reaction, user):
+                return reaction.message.id == base.id and user == message.author and reaction.emoji in reaction_list
+
             if not flatten:
                 choices = discord.Embed(title="Choose the corresponding option:",
                     description="1. Quickstarts\n2. Bots",
