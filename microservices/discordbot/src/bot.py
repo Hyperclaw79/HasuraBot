@@ -22,7 +22,7 @@ class HasuraHub:
         headers = {
             'x-algolia-agent':'HasuraBot',
             'x-algolia-application-id':'WCBB1VVLRC',
-            'x-algolia-api-key': os.environ["ALOGIA_KEY"]
+            'x-algolia-api-key': os.environ["ALGOLIA_KEY"]
         }
         self.sess = requests.Session()
         self.sess.headers.update(headers)
