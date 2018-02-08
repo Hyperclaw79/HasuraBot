@@ -26,12 +26,11 @@ class HasuraHub:
         }
         self.sess = requests.Session()
         self.sess.headers.update(headers)
+        print(self.sess.headers)
 
     def query(self, param):
         body = {"params":'query={}&hitsPerPage=1000&page=0'.format(param)}
-        reply = self.sess.post(url=self.url,json=body)
-        print("Headers: "+str(reply.headers))
-        respo = reply.json()
+        respo = self.sess.post(url=self.url,json=body).json()
         return [{"name":"{}/{}".format(hit["username"],hit["name"]),"description":hit["description"]} for hit in respo["hits"]]
 
 
