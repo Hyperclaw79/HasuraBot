@@ -257,6 +257,7 @@ class HasuraBot(discord.Client):
         user = message.author
         guild = self.get_guild(int(os.environ["GUILD_ID"]))
         user = guild.get_member(user.id)
+        log = guild.get_channel(int(os.environ["LOG_CHANNEL"]))
         framework_change = False             
         if intent.lower() == "intern":
             intern = [role for role in guild.roles if role.name == "hpdf-intern"][0]
@@ -292,22 +293,25 @@ class HasuraBot(discord.Client):
             role = roles_dict[reaction.emoji]
             await user.add_roles(role)
             await base.delete()
-            final = await user.send("{}, you've been successfully assigned the `@{}` role. :thumbsup:".format(user.mention, role))
-            await user.send("Please keep HPDF conversations in channel under the `HPDF` category.")
+            content = "{}, you've been successfully assigned the `@{}` role. :thumbsup:".format(user.mention, role.name)) + \
+            "\nPlease keep HPDF conversations in channel under the `HPDF` category."
+            final = await user.send(content)
             await asyncio.sleep(120)
             await final.delete()
-            log = guild.get_channel(int(os.environ["LOG_CHANNEL"]))
-            content = "User {} has switched to the {} framework.".format(user.name+'#'+user.discriminator,role.replace("hpdf-",''))
+            content = "User {} has switched to the {} framework.".format(user.name+'#'+user.discriminator,role.name.replace("hpdf-",''))
             if framework_change:
                 content = content.replace("switched to","been assigned `@hpdf-intern` role and they chose")
             await log.send(content)
         elif intent.lower() == "ca":
-            ca = [role for role in guild.roles if role.name == "HasuraCA"][0]
+            ca = [role for role in guild.roles if role.name == "Hasura CA"][0]
+            if ca in user.roles:
+                await user.send("You already have the `@Hasura CA` role.")
+                return    
             await user.add_roles(ca)
-            await user.send("Successfully assigned you as `@{}`. :thumbsup:".format(ca))
-            await user.send("Please keep the ca related conversation in #hasura-campus-ambassadors." + \
-                            "\nFeel free to chat about general things in the public channel.")
-            log = guild.get_channel(int(os.environ["LOG_CHANNEL"]))
+            content = "Successfully assigned you as `@{}`. :thumbsup:".format(ca)) + \
+                "\nPlease keep the ca related conversation in #hasura-campus-ambassadors." + \
+                "\nFeel free to chat about general things in the public channel."
+            await user.send(content)
             await log.send('User {} has been assigned `@{}` role.'.format(user.name+'#'+user.discriminator, role))
         else:
             await user.send('You must either choose `intern` or `CA`.')    
