@@ -273,7 +273,8 @@ class HasuraBot(discord.Client):
                             express_icon: express,
                             flask_icon: flask
                         }
-            existing = [role for role in list(roles_dict.values()) if role in user.roles]            
+            existing = [role for role in list(roles_dict.values()) if role in user.roles]
+            print(str(list(roles_dict.values())),str(user.roles),existing)            
             await user.add_roles(intern)
             if intern not in user.roles:
                 base = await user.send("Hey {}, you've successfully been assigned the `@hpdf-intern` role.".format(user.mention) + \
@@ -281,6 +282,7 @@ class HasuraBot(discord.Client):
             elif len(existing) > 0:
                 base = await user.send("You already have a framework assigned to you." + \
                     "Please use `*iamnot {}` before trying this command.".format(existing[0]))
+                return    
             else:
                 base = await user.send("Please react to this message with your appropriate framework.")
             for reaction in list(roles_dict.keys()):
