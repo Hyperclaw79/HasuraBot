@@ -26,7 +26,6 @@ class HasuraHub:
         }
         self.sess = requests.Session()
         self.sess.headers.update(headers)
-        print(self.sess.headers)
 
     def query(self, param):
         body = {"params":'query={}&hitsPerPage=1000&page=0'.format(param)}
