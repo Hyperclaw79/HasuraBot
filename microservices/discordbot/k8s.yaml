@@ -47,6 +47,7 @@ items:
                secretKeyRef:
                   name: hasura-secrets
                   key: cleverbot.user_key.key   
+          # Update this whenever key changes.
           - name: ALGOLIA_KEY
             valueFrom:
                secretKeyRef:
