@@ -51,7 +51,7 @@ class Paginator:
                 await self.base.edit(embed=self.embeds[self.cursor])
             elif op == 0 and self.cursor > 0:
                 self.cursor -= 1
-                await base.edit(embed=self.embeds[self.cursor])
+                await self.base.edit(embed=self.embeds[self.cursor])
             else:
                 pass                    
 
