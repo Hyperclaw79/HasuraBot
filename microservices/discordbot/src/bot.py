@@ -28,6 +28,7 @@ class HasuraHub:
         self.sess.headers.update(headers)
 
     def query(self, param):
+        print("Param: "+param)
         body = {"params":'query={}&hitsPerPage=1000&page=0'.format(param)}
         respo = self.sess.post(url=self.url,json=body).json()
         return [{"name":"{}/{}".format(hit["username"],hit["name"]),"description":hit["description"]} for hit in respo["hits"]]
@@ -408,7 +409,6 @@ class HasuraBot(discord.Client):
                 reaction, user = await self.wait_for('reaction_add',check=check)
                 choice = reaction_list.index(reaction.emoji)
                 projects = self.hubber.query(param=param_list[choice])
-                print("Response: "+projects)
                 await base.clear_reactions()
             else:
                 base = await message.channel.send("{} Fetching results. Please wait. :hourglass_flowing_sand:".format(message.author.mention))
