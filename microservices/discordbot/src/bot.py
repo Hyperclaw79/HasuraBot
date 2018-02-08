@@ -196,13 +196,20 @@ class HasuraBot(discord.Client):
                     print(str(e))
 
     async def cmd_ud(self, message):
+        """
+        Usage:
+            {command_prefix}ud <word>
+                        
+        Get the meanings of a word/phrase from urban dictionary.
+        If no word is given, gets a single meaning of a random word.
+        """
         def embed_generator(word, meaning, example, current, total):
             def _len_check(embed, field_name, field):
                 i = 5
                 content = field
                 while True:
                     if len(content) <= 1024:
-                        hub_embed.add_field(name=field_name, value=content)
+                        hub_embed.add_field(name=field_name, value=content, inline=False)
                         break
                     else:
                         content = '\n'.join(content.split('\n\n')[:i])
@@ -214,7 +221,7 @@ class HasuraBot(discord.Client):
             hub_embed.set_footer(text="{}/{}".format(current, total),icon_url="http://www.iconsplace.com/download/red-list-256.png")
             return hub_embed
         
-        word = message.content.replace("{}ud".format(self.prefix),'').strip().split(' ')[0]
+        word = message.content.replace("{}ud".format(self.prefix),'').strip()
         urban = Urban()
         responses = urban.fetch(word)
         embeds = [
