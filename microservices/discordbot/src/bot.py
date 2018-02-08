@@ -1,66 +1,17 @@
+import aiohttp
+import asyncio
 import discord
 import inspect
-import aiohttp
-import os
-import asyncio
-from textwrap import dedent
-from brain import HyperAI
-import requests
 import math
+import os
+import requests
+from textwrap import dedent
+
+from scripts.brain import HyperAI
+from scripts.paginator import Paginator
+from scripts.urbanify import Urban
 
 discord_token = os.environ["DISCORD_TOKEN"]
-
-class Response:
-    def __init__(self, content, reply=False, delete_after=0):
-        self.content = content
-        self.reply = reply
-        self.delete_after = delete_after
-
-class Paginator:
-    def __init__(self, message, base, embeds, obj):
-        self.message = message
-        self.base = base
-        self.pointers = ['👈','👉']
-        self.embeds = embeds
-        self.cursor = 0
-        self.obj = obj
-
-    async def _add_handler(self):
-        def reaction_check(reaction,user):
-            return user == self.message.author and reaction.message.id == self.base.id and reaction.emoji in self.pointers
-        while True: 
-            reaction, user = await discord.Client.wait_for(self.obj, event='reaction_add', check=reaction_check)
-            op = self.pointers.index(reaction.emoji)
-            if op == 1 and self.cursor < len(self.embeds) - 1:
-                self.cursor += 1
-                await self.base.edit(embed=self.embeds[self.cursor])
-            elif op == 0 and self.cursor > 0:
-                self.cursor -= 1
-                await self.base.edit(embed=self.embeds[self.cursor])
-            else:
-                pass
-
-    async def _remove_handler(self):
-        def reaction_check(reaction,user):
-            return user == self.message.author and reaction.message.id == self.base.id and reaction.emoji in self.pointers
-        while True: 
-            reaction, user = await discord.Client.wait_for(self.obj, event='reaction_remove', check=reaction_check)
-            op = self.pointers.index(reaction.emoji)
-            if op == 1 and self.cursor < len(self.embeds) - 1:
-                self.cursor += 1
-                await self.base.edit(embed=self.embeds[self.cursor])
-            elif op == 0 and self.cursor > 0:
-                self.cursor -= 1
-                await self.base.edit(embed=self.embeds[self.cursor])
-            else:
-                pass                    
-
-    async def run(self):
-        await self.base.edit(content=self.message.author.mention,embed=self.embeds[0])
-        for pointer in self.pointers:
-            await self.base.add_reaction(pointer)
-        asyncio.ensure_future(self._add_handler())
-        asyncio.ensure_future(self._remove_handler())            
 
 class HasuraHub:
     def __init__(self):
@@ -228,7 +179,7 @@ class HasuraBot(discord.Client):
             emoji_dict = {}
             for emoji in list(message.guild.emojis):
                 emoji_dict[emoji.name] = emoji
-            reactions = message.content.replace('{}react ','').split(' ')[1:]
+            reactions = message.content.replace('{}react '.format(self.prefix),'').split(' ')[1:]
             await message.delete()
             for reaction in reactions:
                 try:
@@ -236,14 +187,52 @@ class HasuraBot(discord.Client):
                 except Exception as e:
                     print(str(e))    
         else:
-            reactions = message.content.replace('{}react ','').split(' ')
+            reactions = message.content.replace('{}react '.format(self.prefix),'').split(' ')
             await message.delete()
             for reaction in reactions:
                 try:
                     await target.add_reaction(reaction)
                 except Exception as e:
-                    print(str(e))    
-    
+                    print(str(e))
+
+    async def cmd_ud(self, message):
+        def embed_generator(word, meaning, example, current, total):
+            def _len_check(embed, field_name, field):
+                i = 5
+                content = field
+                while True:
+                    if len(content) <= 1024:
+                        hub_embed.add_field(name=field_name, value=content)
+                        break
+                    else:
+                        content = '\n'.join(content.split('\n\n')[:i])
+                        i -= 1
+                
+            hub_embed = discord.Embed(title=word,description="\u200B",color=15728640)
+            _len_check(hub_embed, "Meaning", meaning)
+            _len_check(hub_embed, "Example", example)
+            hub_embed.set_footer(text="{}/{}".format(current, total),icon_url="http://www.iconsplace.com/download/red-list-256.png")
+            return hub_embed
+        
+        word = message.content.replace("{}ud".format(self.prefix),'').strip().split(' ')[0]
+        urban = Urban()
+        responses = urban.fetch(word)
+        embeds = [
+                embed_generator(
+                    responses[i]["word"], 
+                    responses[i]["meaning"], 
+                    responses[i]["example"],
+                    i+1,
+                    len(responses)
+                ) for i in range(len(responses))
+            ]
+        if len(embeds) == 1:   
+            await message.channel.send(content=message.author.mention,embed=embeds[0])
+        else:
+            base = await message.channel.send("{} Fetching results. Please wait. :hourglass_flowing_sand:".format(message.author.mention))
+            pager = Paginator(message, base, embeds, self)
+            await pager.run()    
+
     async def cmd_iam(self, message):
         """
         Usage:
@@ -498,7 +487,7 @@ class HasuraBot(discord.Client):
         # Don't worry about this part. We are just defining **kwargs for later use.
         cmd, *args = message.content.split(' ') # The first word is cmd, everything else is args. 
         cmd = cmd[len(self.prefix):].lower().strip() # For '$', cmd = cmd[1:0]. Eg. $help -> cmd = help
-        handler = getattr(self,'cmd_{}'.format(cmd),None) # Checks if MyBot has an attribute called cmd_command (cmd_help).
+        handler = getattr(self,'cmd_{}'.format(cmd),None) # Checks if HasuraBot has an attribute called cmd_command (cmd_help).
         if not handler: # The command given doesn't exist in our code, so ignore it.
             return
         prms = inspect.signature(handler) # If attr is defined as async def help(a,b='test',c), prms = (a,b='test',c)
@@ -508,12 +497,11 @@ class HasuraBot(discord.Client):
             h_kwargs['message'] = message
         if params.pop('mentions',None):
             h_kwargs['mentions'] = list(map(message.server.get_member, message.raw_mentions)) # Gets the user for the raw mention and repeats for every user in the guild.            
-        if params.pop('args',None):
-            h_kwargs['args'] = args
+        
 
         # For remaining undefined keywords:
         for key, param in list(params.items()):
-            if not args and param.default is not inspect.Parameter.empty: # Junk parameter present for attribute 
+            if param.default is not inspect.Parameter.empty: # Junk parameter present for attribute 
                 params.pop(key) 
                 continue        # We don't want that in our tester.
 
@@ -523,12 +511,6 @@ class HasuraBot(discord.Client):
 
         # Time to call the test.
         res = await handler(**h_kwargs)
-        if res and isinstance(res, Response): # Valid Response object
-                content = res.content
-                if res.reply:
-                    content = '{},{}'.format(message.author.mention, content)
-
-                sentmsg = await message.channel.send(content)
 
 bot = HasuraBot()    
 bot.run(discord_token)
