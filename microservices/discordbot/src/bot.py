@@ -7,7 +7,6 @@ from textwrap import dedent
 from brain import HyperAI
 import requests
 import math
-import json
 
 discord_token = os.environ["DISCORD_TOKEN"]
 
@@ -31,7 +30,7 @@ class HasuraHub:
     def query(self, param):
         body = {"params":'query={}&hitsPerPage=1000&page=0'.format(param)}
         respo = self.sess.post(url=self.url,json=body).json()
-        print("Response: "+json.dumps(respo,indent=3))
+        print("Headers: "+str(respo.headers))
         return [{"name":"{}/{}".format(hit["username"],hit["name"]),"description":hit["description"]} for hit in respo["hits"]]
 
 
