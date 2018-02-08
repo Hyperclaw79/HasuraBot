@@ -407,6 +407,7 @@ class HasuraBot(discord.Client):
                     await base.add_reaction(reaction)
                 reaction, user = await self.wait_for('reaction_add',check=check)
                 choice = reaction_list.index(reaction.emoji)
+                print(param_list[choice])
                 projects = self.hubber.query(param=param_list[choice])
                 await base.clear_reactions()
             else:
