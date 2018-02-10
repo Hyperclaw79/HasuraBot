@@ -76,7 +76,10 @@ class HasuraBot(discord.Client):
                         
         ASCII Shrugimation.
         """
-        await message.delete()
+        try:
+            await message.delete()
+        except:
+            pass
         shrugList = ["`¯\__(ツ)/¯`", "`¯\_(ツ)_/¯`", "`¯\(ツ)__/¯`", "`¯\_(ツ)_/¯`"]
         lulz = await message.channel.send(shrugList[1])
         i = 2
@@ -93,7 +96,10 @@ class HasuraBot(discord.Client):
         """
         message_content = message.content.strip()
         chan = message.channel
-        await message.delete()
+        try:
+            await message.delete()
+        except:
+            pass
         mesg = message_content.replace('{}wow'.format(self.prefix), '')
         symbol_dict = {
             '!':":exclamation:",
@@ -180,7 +186,10 @@ class HasuraBot(discord.Client):
             for emoji in list(message.guild.emojis):
                 emoji_dict[emoji.name] = emoji
             reactions = message.content.replace('{}react '.format(self.prefix),'').split(' ')[1:]
-            await message.delete()
+            try:
+                await message.delete()
+            except:
+                pass
             for reaction in reactions:
                 try:
                     await target.add_reaction(emoji_dict[reaction])
@@ -188,7 +197,10 @@ class HasuraBot(discord.Client):
                     print(str(e))    
         else:
             reactions = message.content.replace('{}react '.format(self.prefix),'').split(' ')
-            await message.delete()
+            try:
+                await message.delete()
+            except:
+                pass
             for reaction in reactions:
                 try:
                     await target.add_reaction(reaction)
@@ -319,15 +331,26 @@ class HasuraBot(discord.Client):
                         
         Remove a role from yourself.
         """
-        param = message.content.split('{}iamnot '.format(self.prefix))[1].split(' ')[0].strip()
+        param = message.content.split('{}iamnot '.format(self.prefix))[1].strip()
         guild = self.get_guild(int(os.environ["GUILD_ID"]))
-        role = [role for role in guild.roles if role.name.lower() == param.lower()][0]  
-        user = message.author
-        user = guild.get_member(user.id)       
-        await user.remove_roles(role)
-        log = guild.get_channel(int(os.environ["LOG_CHANNEL"]))
-        await log.send('User {} has removed the `@{}` role for themselves.'.format(user.name+'#'+user.discriminator, role))
-        await user.send("Successfully removed the `@{}` role. :thumbsup:".format(role))
+        try:
+            role = [role for role in guild.roles if role.name.lower() == param.lower()][0]  
+            user = message.author
+            user = guild.get_member(user.id)       
+            await user.remove_roles(role)
+            log = guild.get_channel(int(os.environ["LOG_CHANNEL"]))
+            await log.send('User {} has removed the `@{}` role for themselves.'.format(user.name+'#'+user.discriminator, role))
+            await user.send("Successfully removed the `@{}` role. :thumbsup:".format(role))
+        except:
+<<<<<<< HEAD
+<<<<<<< HEAD
+            await message.author.send("Couldn't find the specified role. Please retry.".format(param))
+=======
+            await message.author.send("Couldn't find the specified role. Please retry.".format(role))
+>>>>>>> ee9a470... Minor bug fixes.
+=======
+            await message.author.send("Couldn't find the specified role. Please retry.".format(param))
+>>>>>>> e995735... Minor bug fixes.
 
     async def cmd_prune(self, message):
         """
@@ -425,19 +448,34 @@ class HasuraBot(discord.Client):
                     hub_embed.add_field(name=project["name"], value=val, inline=False)
             else:
                 for project in project_list:
-                    if len(project["description"]) <= 1024:
-                        hub_embed.add_field(name=project["name"], value=project["description"])
-                    else:
-                        val = '\n'.join(project["description"].split('\n\n')[:3])
-                        hub_embed.add_field(name=project["name"], value=val)
-                    hub_embed.add_field(name="\u200B", value="\u200B\n", inline=False)
+                    try:
+                        if len(project["description"]) <= 1024:
+                            hub_embed.add_field(name=project["name"], value=project["description"])
+                        else:
+                            val = '\n'.join(project["description"].split('\n\n')[:3])
+                            hub_embed.add_field(name=project["name"], value=val)
+                        hub_embed.add_field(name="\u200B", value="\u200B\n", inline=False)
+                    except:
+                        pass    
+                    
             hub_embed.set_footer(text="{}/{}".format(current,total),icon_url="http://www.iconsplace.com/download/red-list-256.png")
             return hub_embed
 
         async def _main(param,flatten):
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
             def check(reaction, user):
-                return reaction.message.id == base.id and user == message.author and reaction.emoji in reaction_list
-
+                return user == message.author and reaction.message.id == base.id and reaction.emoji in reaction_list
+=======
+>>>>>>> e0c2ef8... Minor fixes.
+=======
+            def check1(reaction, user):
+=======
+            def check(reaction, user):
+>>>>>>> 2d5ba73... Minor bug fixes.
+                return user == message.author and reaction.message.id == base.id and reaction.emoji in reaction_list
+>>>>>>> ee9a470... Minor bug fixes.
             if not flatten:
                 choices = discord.Embed(title="Choose the corresponding option:",
                     description="1. Quickstarts\n2. Bots",
@@ -449,7 +487,7 @@ class HasuraBot(discord.Client):
                 for reaction in reaction_list:
                     await base.add_reaction(reaction)
                 reaction, user = await self.wait_for('reaction_add',check=check)
-                choice = reaction_list.index(reaction.emoji)
+                choice = int(reaction.emoji.split('\u20e3')[0]) - 1
                 projects = self.hubber.query(param=param_list[choice])
                 await base.clear_reactions()
             else:
