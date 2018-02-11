@@ -342,15 +342,7 @@ class HasuraBot(discord.Client):
             await log.send('User {} has removed the `@{}` role for themselves.'.format(user.name+'#'+user.discriminator, role))
             await user.send("Successfully removed the `@{}` role. :thumbsup:".format(role))
         except:
-<<<<<<< HEAD
-<<<<<<< HEAD
             await message.author.send("Couldn't find the specified role. Please retry.".format(param))
-=======
-            await message.author.send("Couldn't find the specified role. Please retry.".format(role))
->>>>>>> ee9a470... Minor bug fixes.
-=======
-            await message.author.send("Couldn't find the specified role. Please retry.".format(param))
->>>>>>> e995735... Minor bug fixes.
 
     async def cmd_prune(self, message):
         """
@@ -462,20 +454,9 @@ class HasuraBot(discord.Client):
             return hub_embed
 
         async def _main(param,flatten):
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
             def check(reaction, user):
                 return user == message.author and reaction.message.id == base.id and reaction.emoji in reaction_list
-=======
->>>>>>> e0c2ef8... Minor fixes.
-=======
-            def check1(reaction, user):
-=======
-            def check(reaction, user):
->>>>>>> 2d5ba73... Minor bug fixes.
-                return user == message.author and reaction.message.id == base.id and reaction.emoji in reaction_list
->>>>>>> ee9a470... Minor bug fixes.
+        
             if not flatten:
                 choices = discord.Embed(title="Choose the corresponding option:",
                     description="1. Quickstarts\n2. Bots",
