@@ -464,12 +464,12 @@ class HasuraBot(discord.Client):
                 return user == message.author and reaction.message.id == base.id and reaction.emoji in reaction_list
         
             mappings = {
-                'Quickstarts': 'hasura/hello',
-                'Bots ': 'bot',
-                'AR/VR': 'ar/vr',
-                'Datascience/ML/AI': 'data science',
-                'Mobile': 'mobile',
-                'Webstacks':'web'
+                'Quickstarts :smiling_imp:': 'hasura/hello',
+                'Bots :robot:': 'bot',
+                'AR/VR :eyeglasses:': 'ar/vr',
+                'Datascience/ML/AI :microscope:': 'data science',
+                'Mobile :iphone:': 'mobile',
+                'Webstacks :books:':'web'
             }
             try:
                 if not any([flatten, search]):
