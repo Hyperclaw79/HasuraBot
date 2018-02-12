@@ -36,7 +36,7 @@ class HasuraBot(discord.Client):
         super().__init__()
         self.owner = None
         self.aiosession = aiohttp.ClientSession(loop=self.loop)
-        self.http.user_agent += ' HasuraBot/1.0'
+        self.http.user_agent += ' HasuraBot/1.5'
         self.brain = HyperAI(os.environ["BRAIN_USER"],os.environ["BRAIN_KEY"],"HyperAI")
         self.hubber = HasuraHub()
         
@@ -456,42 +456,64 @@ class HasuraBot(discord.Client):
             hub_embed.set_footer(text="{}/{}".format(current,total),icon_url="http://www.iconsplace.com/download/red-list-256.png")
             return hub_embed
 
-        async def _main(param,flatten):
+        async def _main(param, flatten, search):
             def check(reaction, user):
                 return user == message.author and reaction.message.id == base.id and reaction.emoji in reaction_list
         
-            if not flatten:
-                choices = discord.Embed(title="Choose the corresponding option:",
-                    description="1. Quickstarts\n2. Bots",
-                    color=15728640)
-                choices.set_thumbnail(url="https://hasura.io/rstatic/resources/boilerplates.png")
-                base = await message.channel.send(content=message.author.mention,embed=choices)
-                reaction_list = ['1\u20e3','2\u20e3']
-                param_list = ['hasura/hello','bot']
-                for reaction in reaction_list:
-                    await base.add_reaction(reaction)
-                reaction, user = await self.wait_for('reaction_add',check=check)
-                choice = int(reaction.emoji.split('\u20e3')[0]) - 1
-                projects = self.hubber.query(param=param_list[choice])
-                await base.clear_reactions()
-            else:
-                base = await message.channel.send("{} Fetching results. Please wait. :hourglass_flowing_sand:".format(message.author.mention))
-                if param.lower() in ["quickstart","quickstarts"]:
-                    projects = self.hubber.query(param="hasura/hello")
-                elif param.lower() in ["bot","bots"]:
-                    projects = self.hubber.query(param="bot")
-            embeds = [embed_generator(flatten,projects[i:i+4],int(i/4)+1,math.ceil(len(projects)/4)) for i in range(0,len(projects),4) ]
-            pager = Paginator(message, base, embeds, self)
-            await pager.run()
-        
+            mappings = {
+                'Quickstarts': 'hasura/hello',
+                'Bots': 'bot',
+                'AR/VR': 'ar/vr',
+                'Datascience/ML/AI': 'data science',
+                'Mobile': 'mobile',
+                'Webstacks':'web'
+            }
+            try:
+                if not any([flatten, search]):
+                    choices = discord.Embed(title="Choose the corresponding option:",
+                        description=''.join(["{}. {}\n".format(i+1,q) for i,q in enumerate(mappings.keys())]),
+                        color=15728640)
+                    choices.set_thumbnail(url="https://hasura.io/rstatic/resources/boilerplates.png")
+                    base = await message.channel.send(content=message.author.mention,embed=choices)
+                    reaction_list = ['{}\u20e3'.format(i+1) for i in range(6)]
+                    param_list = ['hasura/hello','bot','ar/vr','data science','mobile','web']
+                    for reaction in reaction_list:
+                        await base.add_reaction(reaction)
+                    reaction, user = await self.wait_for('reaction_add',check=check)
+                    choice = int(reaction.emoji.split('\u20e3')[0]) - 1
+                    projects = self.hubber.query(param=param_list[choice])
+                    await base.clear_reactions()
+                elif search:
+                    base = await message.channel.send("{} Fetching results. Please wait. :hourglass_flowing_sand:".format(message.author.mention))
+                    projects = self.hubber.query(param=param.lower())
+                else:
+                    exists = [key for key in mappings.keys() if param.lower() in key.lower()]
+                    base = await message.channel.send("{} Fetching results. Please wait. :hourglass_flowing_sand:".format(message.author.mention))
+                    if len(exists) > 0:
+                        projects = self.hubber.query(param=mappings[exists[0]])
+                    else:
+                        projects = self.hubber.query(param=param.lower())
+                embeds = [embed_generator(flatten,projects[i:i+4],int(i/4)+1,math.ceil(len(projects)/4)) for i in range(0,len(projects),4) ]
+                pager = Paginator(message, base, embeds, self)
+                await pager.run()
+            except:
+                await message.channel.send("Sorry {}, couldn't find any results for {}.".format(message.author.mention,param))
+                await base.delete()
+
         if "list" in message.content:
             param = message.content.replace('{}hub list '.format(self.prefix),'').strip()
             param = param.split(' ')[0]
             flatten = True
+            search = False
+        elif "search" in message.content:
+            param = message.content.replace('{}hub search '.format(self.prefix),'').strip()
+            flatten = False
+            search = True
         else:
             param = None
             flatten = False
-        await _main(param,flatten)        
+            search = False
+        await _main(param, flatten, search)        
 
     async def cmd_feedback(self, message):
         """
