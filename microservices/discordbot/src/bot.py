@@ -422,9 +422,10 @@ class HasuraBot(discord.Client):
         Usage:
             {command_prefix}hub <list [quickstart | bot]>
         
-        Fetches descriptions of quickstarts or bots (more to come soon) available on Hasura Hub.
+        Fetches descriptions of quickstarts, bots, webstacks, etc. available on Hasura Hub.
         If no arguments are specified, opens up an interactive embed for you to make a choice.
-        To get only the list, add the keyword list and type either quickstart or bot.
+        To get only the list, add the keyword 'list'.
+        To do a simple search, add the keyword 'search'.
         Examples:
             To get a list of all bots on the hub:
                 {command_prefix}hub list bots
@@ -432,7 +433,9 @@ class HasuraBot(discord.Client):
                 {command_prefix}hub list quickstart
             To get descriptions along with the project names:
                 {command_prefix}hub
-                This will open an interactable menu.      
+                This will open an interactable menu.
+            To get description of a specific project, say, ShowBot:
+                {command_prefix}hub search ShowBot              
         """
         
         def embed_generator(flatten,project_list,current,total):
@@ -462,7 +465,7 @@ class HasuraBot(discord.Client):
         
             mappings = {
                 'Quickstarts': 'hasura/hello',
-                'Bots': 'bot',
+                'Bots ': 'bot',
                 'AR/VR': 'ar/vr',
                 'Datascience/ML/AI': 'data science',
                 'Mobile': 'mobile',
