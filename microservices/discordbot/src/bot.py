@@ -34,6 +34,7 @@ class HasuraBot(discord.Client):
     def __init__(self):
         self.prefix = '*'
         super().__init__()
+        self.owner = None
         self.aiosession = aiohttp.ClientSession(loop=self.loop)
         self.http.user_agent += ' HasuraBot/1.0'
         self.brain = HyperAI(os.environ["BRAIN_USER"],os.environ["BRAIN_KEY"],"HyperAI")
@@ -41,7 +42,9 @@ class HasuraBot(discord.Client):
         
         
     async def on_ready(self):
-        print('HasuraBot is now live!')
+        info = await self.application_info()
+        self.owner = info.owner
+        print('HasuraBot.\nVersion 1.0\nCreated by {}.'.format(self.owner))
         game = discord.Game(name="the byte crunching game. #HasuraFTW")
         await self.change_presence(game=game)
 
@@ -490,8 +493,19 @@ class HasuraBot(discord.Client):
             flatten = False
         await _main(param,flatten)        
 
-
-
+    async def cmd_feedback(self, message):
+        """
+        Usage:
+            {command_prefix}feedback [Message]
+                        
+        Send a feedback message to the creator.
+        If you spam, you will be automatically blacklisted from using the bot commands.
+        Be reasonable. Thank you.
+        """
+        template = "User **{}** from the **{}** says:\n```\n{}\n```"
+        content = message.content.replace("{}feedback ".format(self.prefix),'').strip()
+        if content != "":
+            await self.owner.send(template.format(message.author.name, message.guild.name, content))
 
     async def on_message(self, message):
         if self.prefix not in message.content and message.content != "(╯°□°）╯︵ ┻━┻" and not self.user.mentioned_in(message):
