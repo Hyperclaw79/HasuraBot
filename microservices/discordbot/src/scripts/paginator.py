@@ -5,7 +5,7 @@ class Paginator:
     def __init__(self, message, base, embeds, obj):
         self.message = message
         self.base = base
-        self.pointers = ['👈','👉']
+        self.pointers = ['👈','👉','❌']
         self.embeds = embeds
         self.cursor = 0
         self.obj = obj
@@ -22,6 +22,9 @@ class Paginator:
             elif op == 0 and self.cursor > 0:
                 self.cursor -= 1
                 await self.base.edit(embed=self.embeds[self.cursor])
+            elif op == 2:
+                await self.base.delete()
+                break    
             else:
                 pass
 

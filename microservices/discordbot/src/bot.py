@@ -505,7 +505,11 @@ class HasuraBot(discord.Client):
         template = "User **{}** from the **{}** says:\n```\n{}\n```"
         content = message.content.replace("{}feedback ".format(self.prefix),'').strip()
         if content != "":
-            await self.owner.send(template.format(message.author.name, message.guild.name, content))
+            if message.guild:
+                await self.owner.send(template.format(message.author.name, message.guild.name, content))
+            else:
+                template = template.replace('from the **{}** ','')
+                await self.owner.send(template.format(message.author.name, content))
             await message.author.send("Thank you for your feedback. :thumbsup::skin-tone-1:")
 
     async def on_message(self, message):
