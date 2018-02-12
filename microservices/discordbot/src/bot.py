@@ -506,6 +506,7 @@ class HasuraBot(discord.Client):
         content = message.content.replace("{}feedback ".format(self.prefix),'').strip()
         if content != "":
             await self.owner.send(template.format(message.author.name, message.guild.name, content))
+            await message.author.send("Thank you for your feedback. :thumbsup::skin-tone-1:")
 
     async def on_message(self, message):
         if self.prefix not in message.content and message.content != "(╯°□°）╯︵ ┻━┻" and not self.user.mentioned_in(message):
