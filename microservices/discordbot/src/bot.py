@@ -7,9 +7,9 @@ import os
 import requests
 from textwrap import dedent
 
-from scripts.brain import HyperAI
-from scripts.paginator import Paginator
-from scripts.urbanify import Urban
+from utils.brain import HyperAI
+from utils.paginator import Paginator
+from utils.urbanify import Urban
 
 discord_token = os.environ["DISCORD_TOKEN"]
 
@@ -40,7 +40,7 @@ class HasuraBot(discord.Client):
         self.brain = HyperAI(os.environ["BRAIN_USER"],os.environ["BRAIN_KEY"],"HyperAI")
         self.hubber = HasuraHub()
         
-        
+
     async def on_ready(self):
         info = await self.application_info()
         self.owner = info.owner
@@ -48,6 +48,22 @@ class HasuraBot(discord.Client):
         game = discord.Game(name="the byte crunching game. #HasuraFTW")
         await self.change_presence(game=game)
 
+
+    def is_owner(self, user):
+        return self.owner.id == user.id    
+
+    def is_mod(self, user):
+        mod_roles = ["moderator","admin","team hasura"]
+        print(user.roles)
+        return any((role for role in mod_roles if role in (role.name for role in user.roles)))
+
+    async def cmd_exec(self, message):
+        if self.is_owner(message.author):
+            parsed = message.content.replace('{}decodify '.format(self.prefix),'')
+            parsed = parsed.replace('```py','').replace('```','')
+            namespace = {}
+            exec(parsed, namespace)
+            await message.channel.send(namespace["content"])
 
     async def cmd_ping(self, message):
         """
@@ -354,9 +370,7 @@ class HasuraBot(discord.Client):
                         
         Deletes last X messages. Mods only.
         """
-        role = str(message.author.top_role)
-        mods = ["admin","team hasura","moderator"]
-        if role in mods:
+        if self.is_mod(message.author):
             try:
                 count = int(message.content.split('{}prune '.format(self.prefix))[1].split(' ')[0].strip())
                 try:
@@ -529,7 +543,7 @@ class HasuraBot(discord.Client):
         """
         template = "User **{}** from the **{}** says:\n```\n{}\n```"
         content = message.content.replace("{}feedback ".format(self.prefix),'').strip()
-        if content != "":
+        if content != "" and not self.is_owner(message.author):  #Remove the second condition during tests. 
             if message.guild:
                 await self.owner.send(template.format(message.author.name, message.guild.name, content))
             else:
