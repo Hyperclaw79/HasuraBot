@@ -62,7 +62,7 @@ class HasuraBot(discord.Client):
 
     async def cmd_exec(self, message):
         if self.is_owner(message.author):
-            parsed = message.content.replace('{}decodify '.format(self.prefix),'')
+            parsed = message.content.replace('{}exec '.format(self.prefix),'')
             parsed = parsed.replace('```py','').replace('```','')
             namespace = {}
             exec(parsed, namespace)
@@ -575,6 +575,22 @@ class HasuraBot(discord.Client):
                 await self.owner.send(template.format(message.author.name, content))
             await message.author.send("Thank you for your feedback. :thumbsup::skin-tone-1:")
 
+    async def cmd_code(self, message, mentions):
+        def user_check(msg):
+            return msg.author.id == mentions[0].id and len(msg.mentions)==0
+        try:
+            prefix = message.clean_content.split('{}code @{}'.format(self.prefix, mentions[0].display_name))[1]
+            prefix = prefix.strip()
+        except:
+            prefix = ""
+        target = await message.channel.history(before=message).find(user_check)
+        try:
+            await message.delete()
+            await target.delete()
+        except:
+            pass
+        await message.channel.send('**{}**:\n```{}\n{}\n```'.format(mentions[0].display_name, prefix, target.content))
+
     async def on_message(self, message):
         if self.prefix not in message.content and message.content != "(╯°□°）╯︵ ┻━┻" and not self.user.mentioned_in(message):
             return
@@ -604,7 +620,7 @@ class HasuraBot(discord.Client):
         if params.pop('message',None):
             h_kwargs['message'] = message
         if params.pop('mentions',None):
-            h_kwargs['mentions'] = list(map(message.server.get_member, message.raw_mentions)) # Gets the user for the raw mention and repeats for every user in the guild.            
+            h_kwargs['mentions'] = list(map(message.guild.get_member, message.raw_mentions)) # Gets the user for the raw mention and repeats for every user in the guild.            
         
 
         # For remaining undefined keywords:
