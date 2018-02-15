@@ -576,7 +576,7 @@ class HasuraBot(discord.Client):
             await message.author.send("Thank you for your feedback. :thumbsup::skin-tone-1:")
 
     async def cmd_code(self, message, mentions):
-         """
+        """
         Usage:
             {command_prefix}code [@username] <prefix>
                         
