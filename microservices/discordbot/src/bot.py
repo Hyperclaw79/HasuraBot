@@ -54,7 +54,6 @@ class HasuraBot(discord.Client):
 
     def is_mod(self, user):
         mod_roles = ["moderator","admin","team hasura"]
-        print(user.roles)
         return any((role for role in mod_roles if role in (role.name for role in user.roles)))
 
     async def cmd_exec(self, message):
@@ -531,6 +530,24 @@ class HasuraBot(discord.Client):
             flatten = False
             search = False
         await _main(param, flatten, search)        
+
+    async def cmd_purge_dupes(self, message):
+        def _get_members(member):
+            roles = [role for role in member.roles if "hpdf" in role.name and role.name != 'hpdf-intern']
+            if len(roles) > 1:
+                return True, roles
+            else:
+                return False, None    
+
+        if self.is_mod(message.author):
+            intern = [role for role in message.guild.roles if "intern" in role.name][0]
+            users = [(member, _get_members(member)[1]) for member in intern.members if _get_members(member)[0]]
+            for user in users:
+                rolesText = '```'+'\n'.join([role.name for role in user[1]])+'```'
+                await user[0].send("Since you have these duplicate roles: {}\n".format(rolesText) + \
+                    "You are being unassigned of these roles. Please use `*iam intern` again.")
+                await user[0].remove_roles(*user[1])
+
 
     async def cmd_feedback(self, message):
         """
