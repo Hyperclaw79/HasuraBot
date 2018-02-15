@@ -576,6 +576,18 @@ class HasuraBot(discord.Client):
             await message.author.send("Thank you for your feedback. :thumbsup::skin-tone-1:")
 
     async def cmd_code(self, message, mentions):
+         """
+        Usage:
+            {command_prefix}code [@username] <prefix>
+                        
+        If you ever spot someone posting a code without using codeblock, please use this command as shown.
+        Provide the prefix of the language too, if you know which language that is.
+        Examples:
+            User test_dummy typed some code but you don't recognize the language:
+                {command_prefix}code @test_dummy
+            User test_dummy typed some code and you know it is in python:
+                {command_prefix}code @test_dummy py
+        """
         def user_check(msg):
             return msg.author.id == mentions[0].id and len(msg.mentions)==0
         try:
