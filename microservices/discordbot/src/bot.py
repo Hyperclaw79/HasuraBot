@@ -56,6 +56,10 @@ class HasuraBot(discord.Client):
         mod_roles = ["moderator","admin","team hasura"]
         return any((role for role in mod_roles if role in (role.name for role in user.roles)))
 
+    def is_admin(self, user):
+        mod_roles = ["admin","team hasura"]
+        return any((role for role in mod_roles if role in (role.name for role in user.roles)))
+
     async def cmd_exec(self, message):
         if self.is_owner(message.author):
             parsed = message.content.replace('{}decodify '.format(self.prefix),'')
@@ -369,11 +373,14 @@ class HasuraBot(discord.Client):
                         
         Deletes last X messages. Mods only.
         """
+        def admin_check(msg):
+            return not self.is_admin(msg.author)
+
         if self.is_mod(message.author):
             try:
                 count = int(message.content.split('{}prune '.format(self.prefix))[1].split(' ')[0].strip())
                 try:
-                    await message.channel.purge(limit=count+1)
+                    await message.channel.purge(limit=count+1, check=admin_check)
                     notif = await message.channel.send("Successfully deleted the last {} messages. :thumbsup:".format(count))
                     await asyncio.sleep(30)
                     await notif.delete()
