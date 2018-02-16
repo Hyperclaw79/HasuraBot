@@ -613,7 +613,7 @@ class HasuraBot(discord.Client):
             ]
             return  all(checks) 
         
-        command = message.content.replace('{}test'.format(self.prefix),'')
+        command = message.content.replace('{}custom'.format(self.prefix),'')
         template = "{} enter the response for \n```\n{}\n```\nMention me in your response."
         await message.channel.send(template.format(message.author.mention, command))
         reply_holder = await self.wait_for('message', check=check)
