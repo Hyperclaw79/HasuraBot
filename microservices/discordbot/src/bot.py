@@ -608,8 +608,7 @@ class HasuraBot(discord.Client):
         def check(msg):
             checks = [
                 message.author.id == msg.author.id,
-                self.user.mentioned_in(msg),
-                msg.content.startswith('reply=')
+                '=' in msg.content
             ]
             return  all(checks) 
         
@@ -617,7 +616,7 @@ class HasuraBot(discord.Client):
         template = "{} enter the response for \n```\n{}\n```\nStart your response with `reply=`."
         await message.channel.send(template.format(message.author.mention, command))
         reply_holder = await self.wait_for('message', check=check)
-        reply = reply_holder.clean_content.replace("reply=",'').strip()
+        reply = reply_holder.clean_content.replace("=",'').strip()
         url = "https://data.{}.hasura-app.io/v1/query".format(os.environ['CLUSTER_NAME'])
         requestPayload = {
             "type": "insert",
