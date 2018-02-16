@@ -22,6 +22,7 @@ class HasuraHub:
             'x-algolia-api-key': os.environ["ALGOLIA_KEY"]
         }
         self.sess = requests.Session()
+        self.data_connector = requests.Session()
         self.sess.headers.update(headers)
 
     def query(self, param):
@@ -602,6 +603,43 @@ class HasuraBot(discord.Client):
         except:
             pass
         await message.channel.send('**{}**:\n```{}\n{}\n```'.format(mentions[0].display_name, prefix, target.content))
+
+    async def cmd_custom(self, message):
+        def check(msg):
+            checks = [
+                message.author.id == msg.author.id,
+                self.user.mentioned_in(msg),
+                not msg.mention_everyone
+            ]
+            return  all(checks) 
+        
+        command = message.content.replace('{}test'.format(self.prefix),'')
+        template = "{} enter the response for \n```\n{}\n```\nMention me in your response."
+        await message.channel.send(template.format(message.author.mention, command))
+        reply_holder = await self.wait_for('message', check=check)
+        reply = reply_holder.clean_content.replace("@{} ".format(self.user.display_name),'')
+        url = "https://data.{}.hasura-app.io/v1/query".format(os.environ['CLUSTER_NAME'])
+        requestPayload = {
+            "type": "insert",
+            "args": {
+                "table": "custom_commands",
+                "objects": [
+                    {
+                        "command": command,
+                        "reply": reply
+                    }
+                ]
+            }
+        }
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer 10d854ea32dcc5934fa48dfdb4eb2609fd333d047ec6db41"
+        }
+        resp = self.data_connector.post(url, json=requestPayload, headers=headers)        
+        if resp.status_code in [200, 304]:
+            await reply_holder.add_reaction("👍🏻")
+        else:
+            await message.channel.send("Sorry {}, something went wrong. :confused:".format(message.author.mention))
 
     async def on_message(self, message):
         if self.prefix not in message.content and message.content != "(╯°□°）╯︵ ┻━┻" and not self.user.mentioned_in(message):
