@@ -22,7 +22,6 @@ class HasuraHub:
             'x-algolia-api-key': os.environ["ALGOLIA_KEY"]
         }
         self.sess = requests.Session()
-        self.data_connector = requests.Session()
         self.sess.headers.update(headers)
 
     def query(self, param):
@@ -40,7 +39,8 @@ class HasuraBot(discord.Client):
         self.http.user_agent += ' HasuraBot/1.5'
         self.brain = HyperAI(os.environ["BRAIN_USER"],os.environ["BRAIN_KEY"],"HyperAI")
         self.hubber = HasuraHub()
-        
+        self.data_connector = requests.Session()
+
 
     async def on_ready(self):
         info = await self.application_info()
@@ -609,15 +609,15 @@ class HasuraBot(discord.Client):
             checks = [
                 message.author.id == msg.author.id,
                 self.user.mentioned_in(msg),
-                not msg.mention_everyone
+                msg.content.startswith('reply=')
             ]
             return  all(checks) 
         
-        command = message.content.replace('{}custom'.format(self.prefix),'')
-        template = "{} enter the response for \n```\n{}\n```\nMention me in your response."
+        command = message.content.replace('{}custom'.format(self.prefix),'').strip()
+        template = "{} enter the response for \n```\n{}\n```\nStart your response with `reply=`."
         await message.channel.send(template.format(message.author.mention, command))
         reply_holder = await self.wait_for('message', check=check)
-        reply = reply_holder.clean_content.replace("@{} ".format(self.user.display_name),'')
+        reply = reply_holder.clean_content.replace("reply=",'').strip()
         url = "https://data.{}.hasura-app.io/v1/query".format(os.environ['CLUSTER_NAME'])
         requestPayload = {
             "type": "insert",
