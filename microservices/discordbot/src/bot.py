@@ -7,7 +7,7 @@ import os
 import requests
 from textwrap import dedent
 
-from utils.brain import HyperAI
+from utils.brain import Brain
 from utils.paginator import Paginator
 from utils.urbanify import Urban
 
@@ -37,7 +37,7 @@ class HasuraBot(discord.Client):
         self.owner = None
         self.aiosession = aiohttp.ClientSession(loop=self.loop)
         self.http.user_agent += ' HasuraBot/1.5'
-        self.brain = HyperAI(os.environ["BRAIN_USER"],os.environ["BRAIN_KEY"],"HyperAI")
+        self.brain = Brain(os.environ["BRAIN_USER"],os.environ["BRAIN_KEY"],"HasuraAI",self.loop)
         self.hubber = HasuraHub()
         self.data_connector = requests.Session()
 
@@ -646,7 +646,7 @@ class HasuraBot(discord.Client):
         
         if self.user.mentioned_in(message) and not message.mention_everyone:
             async with message.channel.typing():
-                response = await self.brain.query(message.content)
+                response, status = await self.brain.query(message.content)
                 await message.channel.send("{} {}".format(message.author.mention,response))
 
         # we do not want the bot to reply to itself or other bots
