@@ -1,3 +1,5 @@
 git+https://github.com/Rapptz/discord.py@rewrite#egg=discord.py[voice]
 
+
 requests
+aiohttp==2.2.5

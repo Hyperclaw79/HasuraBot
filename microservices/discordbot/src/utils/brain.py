@@ -26,7 +26,8 @@ class Brain:
         if resp.status == 200:
             if r["status"] is not "success":
                 self.nick += '-{}'.format(random.randint(1,1000))
-                self.create()
+                self.body['nick'] = self.nick
+                await self.create()
             return "API is online. Using clever mode."
         else:
             return "API is down. Will notify the users."

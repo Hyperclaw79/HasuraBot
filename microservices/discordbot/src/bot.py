@@ -35,6 +35,7 @@ class HasuraBot(discord.Client):
         self.prefix = '*'
         super().__init__()
         self.owner = None
+        self.loop = asyncio.get_event_loop()
         self.aiosession = aiohttp.ClientSession(loop=self.loop)
         self.http.user_agent += ' HasuraBot/1.5'
         self.brain = Brain(os.environ["BRAIN_USER"],os.environ["BRAIN_KEY"],"HasuraAI",self.loop)
@@ -48,6 +49,8 @@ class HasuraBot(discord.Client):
         print('HasuraBot.\nVersion 1.0\nCreated by {}.'.format(self.owner))
         game = discord.Game(name="the byte crunching game. #HasuraFTW")
         await self.change_presence(game=game)
+        created_brain = await self.brain.create()
+        print(created_brain)
 
 
     def is_owner(self, user):
@@ -611,34 +614,34 @@ class HasuraBot(discord.Client):
                 '=' in msg.content
             ]
             return  all(checks) 
-        
-        command = message.content.replace('{}custom'.format(self.prefix),'').strip()
-        template = "{} enter the response for \n```\n{}\n```\nStart your response with `reply=`."
-        await message.channel.send(template.format(message.author.mention, command))
-        reply_holder = await self.wait_for('message', check=check)
-        reply = reply_holder.clean_content.replace("=",'').strip()
-        url = "https://data.{}.hasura-app.io/v1/query".format(os.environ['CLUSTER_NAME'])
-        requestPayload = {
-            "type": "insert",
-            "args": {
-                "table": "custom_commands",
-                "objects": [
-                    {
-                        "command": command,
-                        "reply": reply
-                    }
-                ]
+        if self.is_mod(message.author):
+            command = message.content.replace('{}custom'.format(self.prefix),'').strip()
+            template = "{} enter the response for \n```\n{}\n```\nStart your response with `reply=`."
+            await message.channel.send(template.format(message.author.mention, command))
+            reply_holder = await self.wait_for('message', check=check)
+            reply = reply_holder.clean_content.replace("=",'').strip()
+            url = "https://data.{}.hasura-app.io/v1/query".format(os.environ['CLUSTER_NAME'])
+            requestPayload = {
+                "type": "insert",
+                "args": {
+                    "table": "custom_commands",
+                    "objects": [
+                        {
+                            "command": command,
+                            "reply": reply
+                        }
+                    ]
+                }
             }
-        }
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer 10d854ea32dcc5934fa48dfdb4eb2609fd333d047ec6db41"
-        }
-        resp = self.data_connector.post(url, json=requestPayload, headers=headers)        
-        if resp.status_code in [200, 304]:
-            await reply_holder.add_reaction("👍🏻")
-        else:
-            await message.channel.send("Sorry {}, something went wrong. :confused:".format(message.author.mention))
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer 10d854ea32dcc5934fa48dfdb4eb2609fd333d047ec6db41"
+            }
+            resp = self.data_connector.post(url, json=requestPayload, headers=headers)        
+            if resp.status_code in [200, 304]:
+                await reply_holder.add_reaction("👍🏻")
+            else:
+                await message.channel.send("Sorry {}, something went wrong. :confused:".format(message.author.mention))
 
     async def on_message(self, message):
         if self.prefix not in message.content and message.content != "(╯°□°）╯︵ ┻━┻" and not self.user.mentioned_in(message):
