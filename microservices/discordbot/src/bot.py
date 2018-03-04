@@ -256,7 +256,7 @@ class HasuraBot(discord.Client):
             hub_embed = discord.Embed(title=word,description="\u200B",color=15728640)
             _len_check(hub_embed, "Meaning", meaning)
             _len_check(hub_embed, "Example", example)
-            hub_embed.set_footer(text="{}/{}".format(current, total),icon_url="http://www.iconsplace.com/download/red-list-256.png")
+            hub_embed.set_footer(text="{}/{}".format(current, total),icon_url=message.author.avatar_url)
             return hub_embed
         
         word = message.content.replace("{}ud".format(self.prefix),'').strip()
@@ -480,7 +480,7 @@ class HasuraBot(discord.Client):
                     except:
                         pass    
                     
-            hub_embed.set_footer(text="{}/{}".format(current,total),icon_url="http://www.iconsplace.com/download/red-list-256.png")
+            hub_embed.set_footer(text="{}/{}".format(current,total),icon_url=message.author.avatar_url)
             return hub_embed
 
         async def _main(param, flatten, search):
