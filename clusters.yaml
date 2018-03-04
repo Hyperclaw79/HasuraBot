@@ -1,7 +1,7 @@
 - alias: hasura
   config:
     configmap: controller-conf
-    namespace: hasura
+    namespace: archenemy13-hasura
   data: null
   kubeContext: archenemy13
   name: archenemy13
