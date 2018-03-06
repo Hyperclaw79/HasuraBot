@@ -49,3 +49,24 @@ class Paginator:
             await self.base.add_reaction(pointer)
         asyncio.ensure_future(self._add_handler())
         asyncio.ensure_future(self._remove_handler())
+
+class Embedder:
+    def __init__(self, image):
+        self.image = image
+
+    def generate(self, title, fields, current, total):
+        def _len_check(embed, field_name, description):
+            i = 5
+            content = description
+            while i > 0:
+                if len(content) <= 1024:
+                    embed.add_field(name=field_name, value=content, inline=False)
+                    break
+                else:
+                    content = '\n'.join(content.split('\n\n')[:i])
+                    i -= 1
+        hub_embed = discord.Embed(title=title,description="\u200B",color=15728640)
+        for name, content in fields.items():
+            _len_check(hub_embed, name, content)
+        hub_embed.set_footer(text="{}/{}".format(current, total),icon_url=self.image)
+        return hub_embed

@@ -25,7 +25,6 @@ class Urban:
         ]
         if not word:
             solutions = [sortme[0]]
-            print(solutions)
         else:
             i = 5
             while True:

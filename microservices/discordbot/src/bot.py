@@ -8,7 +8,7 @@ import requests
 from textwrap import dedent
 
 from utils.brain import Brain
-from utils.paginator import Paginator
+from utils.paginator import Paginator, Embedder
 from utils.urbanify import Urban
 
 discord_token = os.environ["DISCORD_TOKEN"]
@@ -47,8 +47,6 @@ class HasuraBot(discord.Client):
         info = await self.application_info()
         self.owner = info.owner
         print('HasuraBot.\nVersion 1.0\nCreated by {}.'.format(self.owner))
-        game = discord.Game(name="the byte crunching game. #HasuraFTW")
-        await self.change_presence(game=game)
         created_brain = await self.brain.create()
         print(created_brain)
 
@@ -241,32 +239,18 @@ class HasuraBot(discord.Client):
         Get the meanings of a word/phrase from urban dictionary.
         If no word is given, gets a single meaning of a random word.
         """
-        def embed_generator(word, meaning, example, current, total):
-            def _len_check(embed, field_name, field):
-                i = 5
-                content = field
-                while True:
-                    if len(content) <= 1024:
-                        hub_embed.add_field(name=field_name, value=content, inline=False)
-                        break
-                    else:
-                        content = '\n'.join(content.split('\n\n')[:i])
-                        i -= 1
-                
-            hub_embed = discord.Embed(title=word,description="\u200B",color=15728640)
-            _len_check(hub_embed, "Meaning", meaning)
-            _len_check(hub_embed, "Example", example)
-            hub_embed.set_footer(text="{}/{}".format(current, total),icon_url=message.author.avatar_url)
-            return hub_embed
-        
         word = message.content.replace("{}ud".format(self.prefix),'').strip()
         urban = Urban()
         responses = urban.fetch(word)
+        embedder = Embedder(message.author.avatar_url)
+        print(embedder, embedder.image)
         embeds = [
-                embed_generator(
+                embedder.generate(
                     responses[i]["word"], 
-                    responses[i]["meaning"], 
-                    responses[i]["example"],
+                    {
+                        "Meaning":responses[i]["meaning"], 
+                        "Example":responses[i]["example"]
+                    },
                     i+1,
                     len(responses)
                 ) for i in range(len(responses))
@@ -462,27 +446,6 @@ class HasuraBot(discord.Client):
                 {command_prefix}hub search ShowBot              
         """
         
-        def embed_generator(flatten,project_list,current,total):
-            hub_embed = discord.Embed(title="List of Projects",description="\u200B",color=15728640)
-            if flatten:
-                for project in project_list:
-                    val = '\u200B'
-                    hub_embed.add_field(name=project["name"], value=val, inline=False)
-            else:
-                for project in project_list:
-                    try:
-                        if len(project["description"]) <= 1024:
-                            hub_embed.add_field(name=project["name"], value=project["description"])
-                        else:
-                            val = '\n'.join(project["description"].split('\n\n')[:3])
-                            hub_embed.add_field(name=project["name"], value=val)
-                        hub_embed.add_field(name="\u200B", value="\u200B\n", inline=False)
-                    except:
-                        pass    
-                    
-            hub_embed.set_footer(text="{}/{}".format(current,total),icon_url=message.author.avatar_url)
-            return hub_embed
-
         async def _main(param, flatten, search):
             def check(reaction, user):
                 return user == message.author and reaction.message.id == base.id and reaction.emoji in reaction_list
@@ -520,7 +483,22 @@ class HasuraBot(discord.Client):
                         projects = self.hubber.query(param=mappings[exists[0]])
                     else:
                         projects = self.hubber.query(param=param.lower())
-                embeds = [embed_generator(flatten,projects[i:i+4],int(i/4)+1,math.ceil(len(projects)/4)) for i in range(0,len(projects),4) ]
+                if flatten:
+                    for project in projects:
+                        project["description"] = '\u200B'
+                project_batch = [projects[i:i+4] for i in range(0,len(projects),4) ]
+                book = []
+                for job in project_batch:
+                    page = {}
+                    for project in job:
+                        page[project["name"]] = project["description"]
+                    book.append(page)
+                embedder = Embedder(message.author.avatar_url)    
+                embeds = [embedder.generate(
+                                "List of Projects", 
+                                book[i], 
+                                i+1,
+                                len(book)) for i in range(len(book))]
                 pager = Paginator(message, base, embeds, self)
                 await pager.run()
             except:
