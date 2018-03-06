@@ -23,6 +23,7 @@ class Urban:
                 "word":meaning["word"]
             } for meaning in meanings
         ]
+        solutions = []
         if not word:
             solutions = [sortme[0]]
         else:

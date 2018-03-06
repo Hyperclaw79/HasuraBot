@@ -242,8 +242,10 @@ class HasuraBot(discord.Client):
         word = message.content.replace("{}ud".format(self.prefix),'').strip()
         urban = Urban()
         responses = urban.fetch(word)
+        if len(responses) == 0:
+            await message.channel.send("Sorry {}, couldn't find any results for {}.".format(message.author.mention, word))
+            return
         embedder = Embedder(message.author.avatar_url)
-        print(embedder, embedder.image)
         embeds = [
                 embedder.generate(
                     responses[i]["word"], 
