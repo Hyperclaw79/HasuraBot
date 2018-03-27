@@ -131,7 +131,7 @@ class HasuraBot(discord.Client):
             '+':":heavy_plus_sign:",
             '-':":heavy_minus_sign:",
             '*':":asterisk:",
-            '#':":hash:"
+            '#':":hash:",
         }
         t = ""
         nums = ['zero','one','two','three','four','five','six','seven','eight','nine']
@@ -145,8 +145,10 @@ class HasuraBot(discord.Client):
               c = "  "
            elif ord(c)>=97 and ord(c)<=122:
               c = ":regional_indicator_{}: ".format(c)
-           elif int(c)>=0 and int(c)<=9: 
+           elif ord(c)>=48 and ord(c)<=57: 
               c = ":{}:".format(nums[int(c)])
+           else:
+               c = "**{}**".format(c)   
            t = t + c
         await chan.send('\n{}'.format(t))            
 
