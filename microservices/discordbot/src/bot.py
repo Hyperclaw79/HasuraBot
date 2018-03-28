@@ -250,7 +250,7 @@ class HasuraBot(discord.Client):
                 pass
             for reaction in reactions:
                 try:
-                    await target.add_reaction(reaction)
+                    await target.add_reaction(str(reaction).replace('<', '').replace('>', ''))
                 except Exception as e:
                     print(str(e))
 
