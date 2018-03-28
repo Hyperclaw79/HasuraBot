@@ -612,6 +612,12 @@ class HasuraBot(discord.Client):
         await message.channel.send('**{}**:\n```{}\n{}\n```'.format(mentions[0].display_name, prefix, target.content))
 
     async def cmd_add_tag(self, message):
+        """
+        Usage:
+            {command_prefix}add_tag tag_name
+                        
+        Moderators and above can add tags using this interface.
+        """
         def check(msg):
             checks = [
                 message.author.id == msg.author.id,
@@ -648,6 +654,12 @@ class HasuraBot(discord.Client):
                 await message.channel.send("Sorry {}, something went wrong. :confused:".format(message.author.mention))
 
     async def cmd_tag(self, message):
+        """
+        Usage:
+            {command_prefix}tag tag_name
+                        
+        Display the reply for a given tag name.
+        """
         command = message.content.replace('{}tag'.format(self.prefix),'').strip()
         url = "https://data.{}.hasura-app.io/v1/query".format(os.environ['CLUSTER_NAME'])
         requestPayload = {
@@ -680,6 +692,12 @@ class HasuraBot(discord.Client):
             await message.channel.send("Sorry {}, something went wrong. :confused:".format(message.author.mention))
 
     async def cmd_bomb(self, message):
+        """
+        Usage:
+            {command_prefix}bomb
+                        
+        Use this when you're really bored and got nothing better to do. XD
+        """
         def check(rct, user):
             return rct.message.id == base.id and rct.emoji == '🔥' and user.id != self.user.id
         
