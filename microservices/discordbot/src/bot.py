@@ -174,34 +174,34 @@ class HasuraBot(discord.Client):
         await chan.send('\n{}'.format(t))            
 
     async def cmd_ppap(self, message):
-        """
-        Usage:
-            {command_prefix}ppap
-                        
-        PPAP Cancer, bot version.
-        """
-        mes = await message.channel.send("`¯\_(ツ)_/¯`")
-        await mes.edit(content=":pen_ballpoint:         \n¯\_(ツ)_/¯")
-        await asyncio.sleep(1)	   
-        await mes.edit(content=":pen_ballpoint:         :apple:\n¯\_(ツ)_/¯")
-        await asyncio.sleep(1) 	   
-        await mes.edit(content=":apple::pen_ballpoint:")
-        await asyncio.sleep(2.5)
-        await mes.edit(content=":pen_ballpoint:         \n¯\_(ツ)_/¯")
-        await asyncio.sleep(1) 	   
-        await mes.edit(content=":pen_ballpoint:         :pineapple:\n¯\_(ツ)_/¯")
-        await asyncio.sleep(1)	   
-        await mes.edit(content=":pineapple::pen_ballpoint:")
-        await asyncio.sleep(2.5)	   
-        await mes.edit(content=":apple::pen_ballpoint:")
-        await asyncio.sleep(1)	   
-        await mes.edit(content=":pineapple::pen_ballpoint:")
-        await asyncio.sleep(2.5)
-        contents = [":pen_ballpoint:",":pineapple:",":apple:",":pen_ballpoint:"]
-        initial = ""
-        for content in contents:
-            await mes.edit(content=initial+content)
-            initial = mes.content     	     
+       """
+       Usage: 
+       {command_prefix}ppap
+
+       PPAP cancer, bot version.
+       """
+       mes = await message.channel.send("`¯\_(ツ)_/¯`")
+       await mes.edit(content=":pen_ballpoint:         \n¯\_(ツ)_/¯")
+       await asyncio.sleep(1)	   
+       await mes.edit(content=":pen_ballpoint:         :apple:\n¯\_(ツ)_/¯")
+       await asyncio.sleep(1) 	   
+       await mes.edit(content=":apple::pen_ballpoint:")
+       await asyncio.sleep(2.5)
+       await mes.edit(content=":pen_ballpoint:         \n¯\_(ツ)_/¯")
+       await asyncio.sleep(1) 	   
+       await mes.edit(content=":pen_ballpoint:         :pineapple:\n¯\_(ツ)_/¯")
+       await asyncio.sleep(1)	   
+       await mes.edit(content=":pineapple::pen_ballpoint:")
+       await asyncio.sleep(2.5)	   
+       await mes.edit(content=":apple::pen_ballpoint:")
+       await asyncio.sleep(1)	   
+       await mes.edit(content=":pineapple::pen_ballpoint:")
+       await asyncio.sleep(2.5)
+       contents = [":pen_ballpoint:",":pineapple:",":apple:",":pen_ballpoint:"]
+       initial = ""
+       for content in contents:
+        await mes.edit(content=initial+content)
+        initial = mes.content     	     
 
     async def cmd_moonwalk(self, message):
        """
@@ -290,7 +290,7 @@ class HasuraBot(discord.Client):
     async def cmd_iam(self, message):
         """
         Usage:
-            {command_prefix}iam role
+            {command_prefix}iam [role]
                         
         Assign yourself the entry level role.
         """
@@ -382,7 +382,7 @@ class HasuraBot(discord.Client):
     async def cmd_prune(self, message):
         """
         Usage:
-            {command_prefix}prune
+            {command_prefix}prune [X]
                         
         Deletes last X messages. Mods only.
         """
@@ -437,7 +437,7 @@ class HasuraBot(discord.Client):
             validity_checks = [
                 att.startswith('cmd_'),
                 att != 'cmd_help',
-                getattr(self, att, None).__doc__!=None
+                getattr(self, att, None).__doc__
             ]
             return all(validity_checks)
 
@@ -459,13 +459,13 @@ class HasuraBot(discord.Client):
                 embeds.append(embed)
             base = await message.author.send(content='**HasuraBot Commands List:**\n', embed=embeds[0])
             pager = Paginator(message, base, embeds, self)
-            await pager.run(content='**HasuraBot Commands List:**\n')
+            pager.run(content='**HasuraBot Commands List:**\n')
             
 
     async def cmd_hub(self, message):
         """
         Usage:
-            {command_prefix}hub <list [quickstart | bot]>
+            {command_prefix}hub <[list | search] [query]>
         
         Fetches descriptions of quickstarts, bots, webstacks, etc. available on Hasura Hub.
         If no arguments are specified, opens up an interactive embed for you to make a choice.
@@ -625,7 +625,7 @@ class HasuraBot(discord.Client):
     async def cmd_add_tag(self, message):
         """
         Usage:
-            {command_prefix}add_tag tag_name
+            {command_prefix}add_tag [tag_name]
                         
         Moderators and above can add tags using this interface.
         """
@@ -667,7 +667,7 @@ class HasuraBot(discord.Client):
     async def cmd_tag(self, message):
         """
         Usage:
-            {command_prefix}tag tag_name
+            {command_prefix}tag [tag_name]
                         
         Display the reply for a given tag name.
         """
