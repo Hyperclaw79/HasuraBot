@@ -625,6 +625,26 @@ class HasuraBot(discord.Client):
             else:
                 await message.channel.send("Sorry {}, something went wrong. :confused:".format(message.author.mention))
 
+    async def cmd_bomb(self, message):
+        def check(rct, user):
+            return rct.message.id == base.id and rct.emoji == '🔥' and user.id != self.user.id
+        
+        base = await message.channel.send(':bomb:')
+        await base.add_reaction('🔥')
+        try:
+            reaction, user = await self.wait_for('reaction_add', check=check, timeout=25.0)
+            await base.clear_reactions()
+            embed = discord.Embed(title=f"OMG {user.display_name}!", description="What a sadist!", color=15728640)
+            embed.set_image(url='https://vignette.wikia.nocookie.net/clashroyale/images/3/39/EXPLOSION%21.gif')
+            await base.edit(content=None, embed=embed)
+        except Exception as e:
+            print(str(e))
+            await base.clear_reactions()
+            await base.edit(content='Phew Saved!')
+        await asyncio.sleep(10.0)
+        await base.delete()
+
+
     async def on_message(self, message):
         if self.prefix not in message.content and message.content != "(╯°□°）╯︵ ┻━┻" and not self.user.mentioned_in(message):
             return
@@ -633,7 +653,7 @@ class HasuraBot(discord.Client):
             async with message.channel.typing():
                 response, status = await self.brain.query(message.content)
                 await message.channel.send("{} {}".format(message.author.mention,response))
-
+                    
         # we do not want the bot to reply to itself or other bots
         if message.author.id == self.user.id or message.author.bot:
             return
