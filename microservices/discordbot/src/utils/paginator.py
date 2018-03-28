@@ -43,8 +43,9 @@ class Paginator:
             else:
                 pass                    
 
-    async def run(self):
-        await self.base.edit(content=self.message.author.mention,embed=self.embeds[0])
+    async def run(self, content=None):
+        content = content or self.message.author.mention
+        await self.base.edit(content=content,embed=self.embeds[0])
         for pointer in self.pointers:
             await self.base.add_reaction(pointer)
         asyncio.ensure_future(self._add_handler())

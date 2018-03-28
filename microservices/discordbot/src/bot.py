@@ -174,34 +174,34 @@ class HasuraBot(discord.Client):
         await chan.send('\n{}'.format(t))            
 
     async def cmd_ppap(self, message):
-       """
-       Usage: 
-       {command_prefix}ppap
-
-       PPAP cancer, bot version.
-       """
-       mes = await message.channel.send("`¯\_(ツ)_/¯`")
-       await mes.edit(content=":pen_ballpoint:         \n¯\_(ツ)_/¯")
-       await asyncio.sleep(1)	   
-       await mes.edit(content=":pen_ballpoint:         :apple:\n¯\_(ツ)_/¯")
-       await asyncio.sleep(1) 	   
-       await mes.edit(content=":apple::pen_ballpoint:")
-       await asyncio.sleep(2.5)
-       await mes.edit(content=":pen_ballpoint:         \n¯\_(ツ)_/¯")
-       await asyncio.sleep(1) 	   
-       await mes.edit(content=":pen_ballpoint:         :pineapple:\n¯\_(ツ)_/¯")
-       await asyncio.sleep(1)	   
-       await mes.edit(content=":pineapple::pen_ballpoint:")
-       await asyncio.sleep(2.5)	   
-       await mes.edit(content=":apple::pen_ballpoint:")
-       await asyncio.sleep(1)	   
-       await mes.edit(content=":pineapple::pen_ballpoint:")
-       await asyncio.sleep(2.5)
-       contents = [":pen_ballpoint:",":pineapple:",":apple:",":pen_ballpoint:"]
-       initial = ""
-       for content in contents:
-        await mes.edit(content=initial+content)
-        initial = mes.content     	     
+        """
+        Usage:
+            {command_prefix}ppap
+                        
+        PPAP Cancer, bot version.
+        """
+        mes = await message.channel.send("`¯\_(ツ)_/¯`")
+        await mes.edit(content=":pen_ballpoint:         \n¯\_(ツ)_/¯")
+        await asyncio.sleep(1)	   
+        await mes.edit(content=":pen_ballpoint:         :apple:\n¯\_(ツ)_/¯")
+        await asyncio.sleep(1) 	   
+        await mes.edit(content=":apple::pen_ballpoint:")
+        await asyncio.sleep(2.5)
+        await mes.edit(content=":pen_ballpoint:         \n¯\_(ツ)_/¯")
+        await asyncio.sleep(1) 	   
+        await mes.edit(content=":pen_ballpoint:         :pineapple:\n¯\_(ツ)_/¯")
+        await asyncio.sleep(1)	   
+        await mes.edit(content=":pineapple::pen_ballpoint:")
+        await asyncio.sleep(2.5)	   
+        await mes.edit(content=":apple::pen_ballpoint:")
+        await asyncio.sleep(1)	   
+        await mes.edit(content=":pineapple::pen_ballpoint:")
+        await asyncio.sleep(2.5)
+        contents = [":pen_ballpoint:",":pineapple:",":apple:",":pen_ballpoint:"]
+        initial = ""
+        for content in contents:
+            await mes.edit(content=initial+content)
+            initial = mes.content     	     
 
     async def cmd_moonwalk(self, message):
        """
@@ -417,38 +417,50 @@ class HasuraBot(discord.Client):
         If a command is specified, it prints a help message for that command.
         Otherwise, it lists the available commands.
         """
+        def embedder(command):
+            cmdc = getattr(self, 'cmd_' + command, None)
+            content = dedent(cmdc.__doc__).replace('{command_prefix}', self.prefix)
+            seperator = content.split('Usage:\n')[1].split('\n\n')
+            syntax = seperator[0]
+            details = '\n'.join(seperator[1:])
+            embed = discord.Embed(title=command.title(), description='\u200B', color=15728640)
+            embed.add_field(name='Syntax', value=syntax, inline=False)
+            if 'Examples' in details:
+                desc, examples = details.split('Examples:')
+                embed.add_field(name='Description', value=desc.strip(), inline=False)
+                embed.add_field(name='Examples', value=examples.strip(), inline=False)
+            else:
+                embed.add_field(name='Description', value=details.strip(), inline=False)
+            embed.set_thumbnail(url=self.user.avatar_url)
+            return embed
+        def valid(att):
+            validity_checks = [
+                att.startswith('cmd_'),
+                att != 'cmd_help',
+                getattr(self, att, None).__doc__!=None
+            ]
+            return all(validity_checks)
+
         try:
             command = message.content.split("{}help ".format(self.prefix))[1].strip()
             cmdc = getattr(self, 'cmd_' + command, None)
             if cmdc:
-                content = dedent(cmdc.__doc__).replace('{command_prefix}', '@   ' + self.prefix)
-                content = content.replace('Usage','Usage (exclude the @)').replace('\n\n','\n')
-                await message.author.send('```py\n{}```'.format(content))
+                embed = embedder(command)
+                await message.author.send(embed=embed)
             else:
                 await message.author.send('No such command')
         except:
-            msg1 = await message.author.send('**HasuraBot Commands List:**\n')
-            commands = []
-            cmdc = {}
-            #txt2 = ''
-            #txt3 = ''
-            for att in dir(self):
-                if att.startswith('cmd_') and att != 'cmd_help':
-                    try:
-                        atc = getattr(self, att)
-                        cmdc[att] = dedent(atc.__doc__.split('\n')[4])
-                    except:
-                        print('Skipping hidden command: ' + att)
-            comlen = len(cmdc)
-            delme = await message.author.send('__Total number of commands__: **{}**\n'.format(comlen))
-            txt1 = "```md\n"
-            for att in cmdc:
-                txt1 += dedent('[{}]( {})\n' .format(att.replace('cmd_', self.prefix),cmdc[att]))
-            txt1 += "```"    
-            await delme.edit(content=delme.content+txt1)
-            await asyncio.sleep(300)
-            await msg1.delete()
-            await delme.delete()
+            embeds = []
+            valids = [att for att in dir(self) if valid(att)]
+            for valid in valids:
+                embed = embedder(valid.replace('cmd_', ''))
+                current = valids.index(valid) + 1
+                embed.set_footer(text="{}/{}".format(current, len(valids)),icon_url=message.author.avatar_url)
+                embeds.append(embed)
+            base = await message.author.send(content='**HasuraBot Commands List:**\n', embed=embeds[0])
+            pager = Paginator(message, base, embeds, self)
+            await pager.run(content='**HasuraBot Commands List:**\n')
+            
 
     async def cmd_hub(self, message):
         """
@@ -460,15 +472,15 @@ class HasuraBot(discord.Client):
         To get only the list, add the keyword 'list'.
         To do a simple search, add the keyword 'search'.
         Examples:
-            To get a list of all bots on the hub:
-                {command_prefix}hub list bots
-            To get a list of all quickstarts on the hub:
-                {command_prefix}hub list quickstart
-            To get descriptions along with the project names:
-                {command_prefix}hub
-                This will open an interactable menu.
-            To get description of a specific project, say, ShowBot:
-                {command_prefix}hub search ShowBot              
+        To get a list of all bots on the hub:
+            {command_prefix}hub list bots
+        To get a list of all quickstarts on the hub:
+            {command_prefix}hub list quickstart
+        To get descriptions along with the project names:
+            {command_prefix}hub
+            This will open an interactable menu.
+        To get description of a specific project, say, ShowBot:
+            {command_prefix}hub search ShowBot              
         """
         
         async def _main(param, flatten, search):
@@ -590,10 +602,10 @@ class HasuraBot(discord.Client):
         If you ever spot someone posting a code without using codeblock, please use this command as shown.
         Provide the prefix of the language too, if you know which language that is.
         Examples:
-            User test_dummy typed some code but you don't recognize the language:
-                {command_prefix}code @test_dummy
-            User test_dummy typed some code and you know it is in python:
-                {command_prefix}code @test_dummy py
+        User test_dummy typed some code but you don't recognize the language:
+            {command_prefix}code @test_dummy
+        User test_dummy typed some code and you know it is in python:
+            {command_prefix}code @test_dummy py
         """
         def user_check(msg):
             return msg.author.id == mentions[0].id and len(msg.mentions)==0
