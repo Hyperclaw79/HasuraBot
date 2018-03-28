@@ -17,7 +17,6 @@ class Brain:
                 }
         self.loop = loop
         self.sess = aiohttp.ClientSession(loop=self.loop)
-        print("Initiated Brain ClientSession.")
 
     async def create(self):
         with aiohttp.Timeout(10):

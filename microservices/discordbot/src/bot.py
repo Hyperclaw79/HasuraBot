@@ -29,6 +29,27 @@ class HasuraHub:
         respo = self.sess.post(url=self.url,json=body).json()
         return [{"name":"{}/{}".format(hit["username"],hit["name"]),"description":hit["description"]} for hit in respo["hits"]]
 
+class AdminLogin:
+    def __init__(self):
+        data = {
+          "provider": "username",
+          "data": {
+            "username": "admin",
+            "password": os.environ['ADMIN_PASSWORD']
+          }
+        }
+        resp = requests.post('https://auth.{}.hasura-app.io/v1/login'.format(os.environ['CLUSTER_NAME']),json=data)
+        self.bearer_token = resp.json()['auth_token']
+        
+    def get_bearer(self):
+        headers = {
+            "Authorization":"Bearer {}".format(self.bearer_token)
+        }
+        resp = requests.get('https://auth.{}.hasura-app.io/v1/user/info'.format(os.environ['CLUSTER_NAME']),headers=headers).json()
+        if not resp.get('hasura_id', None):
+            self.__init__()
+        print(self.bearer_token)    
+        return self.bearer_token
 
 class HasuraBot(discord.Client):
     def __init__(self):
@@ -41,15 +62,16 @@ class HasuraBot(discord.Client):
         self.brain = Brain(os.environ["BRAIN_USER"],os.environ["BRAIN_KEY"],"HasuraAI",self.loop)
         self.hubber = HasuraHub()
         self.data_connector = requests.Session()
-
+        self.admin = AdminLogin()
+        self.admin_token = ''
 
     async def on_ready(self):
         info = await self.application_info()
         self.owner = info.owner
         print('HasuraBot.\nVersion 1.0\nCreated by {}.'.format(self.owner))
+        self.admin_token = self.admin.get_bearer()
         created_brain = await self.brain.create()
         print(created_brain)
-
 
     def is_owner(self, user):
         return self.owner.id == user.id    
@@ -589,7 +611,7 @@ class HasuraBot(discord.Client):
             pass
         await message.channel.send('**{}**:\n```{}\n{}\n```'.format(mentions[0].display_name, prefix, target.content))
 
-    async def cmd_custom(self, message):
+    async def cmd_add_tag(self, message):
         def check(msg):
             checks = [
                 message.author.id == msg.author.id,
@@ -601,7 +623,7 @@ class HasuraBot(discord.Client):
             template = "{} enter the response for \n```\n{}\n```\nStart your response with `reply=`."
             await message.channel.send(template.format(message.author.mention, command))
             reply_holder = await self.wait_for('message', check=check)
-            reply = reply_holder.clean_content.replace("=",'').strip()
+            reply = reply_holder.clean_content.split("=")[1].strip()
             url = "https://data.{}.hasura-app.io/v1/query".format(os.environ['CLUSTER_NAME'])
             requestPayload = {
                 "type": "insert",
@@ -609,7 +631,7 @@ class HasuraBot(discord.Client):
                     "table": "custom_commands",
                     "objects": [
                         {
-                            "command": command,
+                            "command": command.lower(),
                             "reply": reply
                         }
                     ]
@@ -617,13 +639,45 @@ class HasuraBot(discord.Client):
             }
             headers = {
                 "Content-Type": "application/json",
-                "Authorization": "Bearer 10d854ea32dcc5934fa48dfdb4eb2609fd333d047ec6db41"
+                "Authorization": "Bearer {}".format(self.admin_token)
             }
             resp = self.data_connector.post(url, json=requestPayload, headers=headers)        
             if resp.status_code in [200, 304]:
                 await reply_holder.add_reaction("👍🏻")
             else:
                 await message.channel.send("Sorry {}, something went wrong. :confused:".format(message.author.mention))
+
+    async def cmd_tag(self, message):
+        command = message.content.replace('{}tag'.format(self.prefix),'').strip()
+        url = "https://data.{}.hasura-app.io/v1/query".format(os.environ['CLUSTER_NAME'])
+        requestPayload = {
+            "type": "select",
+            "args": {
+                "table": "custom_commands",
+                "columns": [
+                    "reply"
+                ],
+                "where": {
+                    "command": {
+                        "$like": "%{}%".format(command.lower())
+                    }
+                }
+            }
+        }
+        headers = {
+            "Content-Type": "application/json",
+                "Authorization": "Bearer {}".format(self.admin_token)
+        }
+        resp = self.data_connector.post(url, json=requestPayload, headers=headers)        
+        if resp.status_code in [200, 304]:
+            res = resp.json()
+            if res:
+                await message.channel.send("{}\n{}".format(message.author.mention, res[0]["reply"]))
+            else:
+                await message.channel.send("Sorry {}, couldn't find any such tag".format(message.author.mention))
+        else:
+            print(resp.content)
+            await message.channel.send("Sorry {}, something went wrong. :confused:".format(message.author.mention))
 
     async def cmd_bomb(self, message):
         def check(rct, user):

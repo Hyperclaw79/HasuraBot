@@ -53,6 +53,11 @@ items:
                secretKeyRef:
                   name: hasura-secrets
                   key: algolia.api_token.key
+          - name: ADMIN_PASSWORD
+            valueFrom:
+               secretKeyRef:
+                  name: hasura-secrets
+                  key: auth.admin.password        
           - name: CLUSTER_NAME
             value: '{{ cluster.name }}'
           image: hasura/hello-world:latest
