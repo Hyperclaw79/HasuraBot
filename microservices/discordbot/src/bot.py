@@ -48,7 +48,6 @@ class AdminLogin:
         resp = requests.get('https://auth.{}.hasura-app.io/v1/user/info'.format(os.environ['CLUSTER_NAME']),headers=headers).json()
         if not resp.get('hasura_id', None):
             self.__init__()
-        print(self.bearer_token)    
         return self.bearer_token
 
 class HasuraBot(discord.Client):
