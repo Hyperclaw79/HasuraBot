@@ -1,4 +1,4 @@
-FROM python:3.6.4-alpine3.7
+FROM python:3.6.6-alpine3.7
 
 # install requirements
 RUN apk update && apk upgrade && \

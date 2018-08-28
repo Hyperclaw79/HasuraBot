@@ -57,7 +57,12 @@ items:
             valueFrom:
                secretKeyRef:
                   name: hasura-secrets
-                  key: auth.admin.password        
+                  key: auth.admin.password
+          - name: STACKAPI_KEY
+            valueFrom:
+               secretKeyRef:
+                  name: hasura-secrets
+                  key: stackapi.key          
           - name: CLUSTER_NAME
             value: '{{ cluster.name }}'
           image: hasura/hello-world:latest

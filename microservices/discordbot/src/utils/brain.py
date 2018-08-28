@@ -15,20 +15,17 @@ class Brain:
                     'key': self.key,
                     'nick': self.nick
                 }
-        self.loop = loop
-        self.sess = aiohttp.ClientSession(loop=self.loop)
+        self.sess = aiohttp.ClientSession(loop=loop)
 
     async def create(self):
-        with aiohttp.Timeout(10):
-            async with self.sess.post('https://cleverbot.io/1.0/create', json=self.body) as resp:
-                r = await resp.json()
+        async with self.sess.post('https://cleverbot.io/1.0/create', json=self.body) as resp:
+            r = await resp.json()
         if resp.status == 200:
             if r["status"] != "success":
                 self.nick += '-{}'.format(random.randint(1,1000))
                 self.body['nick'] = self.nick
-                with aiohttp.Timeout(10):
-                    async with self.sess.post('https://cleverbot.io/1.0/create', json=self.body) as resp:
-                        r = await resp.json()
+                async with self.sess.post('https://cleverbot.io/1.0/create', json=self.body) as resp:
+                    r = await resp.json()
                 if r["status"] == "success":
                     return "API is online. Using clever mode."
                 else:
@@ -42,9 +39,8 @@ class Brain:
     async def query(self, text):
         self.body['text'] = text
         try:
-            with aiohttp.Timeout(10):
-                async with self.sess.post('https://cleverbot.io/1.0/ask', json=self.body) as resp:
-                    r = await resp.json()
+            async with self.sess.post('https://cleverbot.io/1.0/ask', json=self.body) as resp:
+                r = await resp.json()
 
             if r['status'] == 'success':
                 return r['response'], 200

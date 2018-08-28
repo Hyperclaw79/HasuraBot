@@ -1,7 +1,6 @@
+clusters:
 - alias: hasura
-  config:
-    configmap: controller-conf
-    namespace: archenemy13-hasura
   data: null
-  kubeContext: archenemy13
-  name: archenemy13
+  infra:
+    provider: hasura-free
+version: v1
