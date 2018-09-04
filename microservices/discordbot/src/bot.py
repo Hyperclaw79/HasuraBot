@@ -94,7 +94,7 @@ class HasuraBot(discord.Client):
         return self.owner.id == user.id    
 
     def is_mod(self, user):
-        mod_roles = ["moderator", "admin", "team hasura"]
+        mod_roles = ["moderator", "admin", "team hasura", "hpdf-mod"]
         return any((role for role in mod_roles if role in (role.name for role in user.roles)))
 
     def is_admin(self, user):
@@ -817,16 +817,16 @@ class HasuraBot(discord.Client):
 
         if self.is_mod(message.author):
             so = Stacky(key=self.stackapi_key, max_pages=1, page_size=10)
-            chan = discord.utils.find(lambda ch: ch.name == "bot_testing", message.guild.channels)
+            chan = discord.utils.find(lambda ch: ch.name == "so-logs", message.guild.channels)
             while True:
                 last_question = await chan.history().find(question_check)
                 try:
                     last_id = int(last_question.embeds[0].fields[1].value)
-                    timestamp = last_question.embeds[0].timestamp.replace(tzinfo=timezone.utc).timestamp()
+                    timestamp = int(last_question.embeds[0].timestamp.replace(tzinfo=timezone.utc).timestamp())
                 except:
                     last_id = None,
                     timestamp = None
-                questions = so.fetch(timestamp=int(timestamp), last_id=last_id) 
+                questions = so.fetch(timestamp=timestamp, last_id=last_id) 
                 embeds = []
                 for question in questions:
                     emb = discord.Embed(
