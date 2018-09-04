@@ -808,6 +808,14 @@ class HasuraBot(discord.Client):
         await base.delete()
 
     async def cmd_stacky(self, message):
+        """
+        Usage:
+            {command_prefix}cmd_stacky
+                        
+        Initiate the Stacky module which will poll and log latest StackOverflow questions regarding Hasura.
+        Moderaters and above can use this command. The command repeats automatically ever 1hr.
+        Currently, the following tags are fetched: hasura, graphql-engine, prisma, postgraphile
+        """
         def question_check(msg):
             if msg.embeds:
                 checks = [
@@ -837,6 +845,7 @@ class HasuraBot(discord.Client):
                     )
                     emb.add_field(name="Created By", value=question["owner"], inline=False)
                     emb.add_field(name="Question_ID", value=question["question_id"], inline=False)
+                    emb.add_field(name="Tags", value=question["tags"], inline=False)
                     emb.add_field(name="\u200B", value="\u200B", inline=False)
                     emb.set_thumbnail(url=question["thumbnail"])
                     embeds.append(emb)
