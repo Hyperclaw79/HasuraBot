@@ -705,7 +705,7 @@ class HasuraBot(discord.Client):
             ]
             return  all(checks) 
         if self.is_mod(message.author):
-            command = message.content.replace(f'{self.prefix}custom', '').strip()
+            command = message.content.replace(f'{self.prefix}add_tag', '').strip()
             template = "{} enter the response for \n```\n{}\n```\nStart your response with `reply=`."
             await message.channel.send(template.format(message.author.mention, command))
             reply_holder = await self.wait_for('message', check=check)

@@ -1,7 +1,0 @@
-- args:
-    sql: CREATE TABLE "custom_commands"("command" text NOT NULL, "reply" text NOT
-      NULL, PRIMARY KEY ("command") )
-  type: run_sql
-- args:
-    name: custom_commands
-  type: add_existing_table_or_view
